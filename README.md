@@ -32,6 +32,7 @@ License
 -------
 
 Copyright 2012 Whisper Systems
+
 Copyright 2014 Securecom
 
 
