@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.securecomcode.voice"
+          android:versionCode="1"
+          android:versionName="1.0">
+
+    <uses-sdk android:targetSdkVersion="17" android:minSdkVersion="8"/>
+
+    <uses-feature android:name="android.hardware.telephony" android:required="false"></uses-feature>
+
+    <!-- C2DM Permissions -->
+    <permission android:name="com.securecomcode.voice.permission.C2D_MESSAGE"
+                android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.securecomcode.voice.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="com.google.android.apps.googlevoice.permission.RECEIVE_SMS" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.CALL_PRIVILEGED" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.RAISED_THREAD_PRIORITY" />
+    <uses-permission android:name="android.permission.READ_CALL_STATE"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.WRITE_CALL_LOG"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <application android:name="com.securecomcode.voice.ApplicationListener"
+                 android:icon="@drawable/icon"
+                 android:label="@string/app_name"
+                 android:theme="@style/Theme.Sherlock.Light.DarkActionBar">
+
+        <activity android:name=".RedPhone"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/Theme.Sherlock"
+                  android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|fontScale"
+                  android:launchMode="singleTask">
+
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="sms"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.DialerActivity"
+                  android:label="@string/app_name"
+                  android:screenOrientation="portrait"
+                  android:uiOptions="splitActionBarWhenNarrow"
+                  android:launchMode="singleTop"
+                  android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.AboutActivity" 
+                  android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+        
+        <activity android:name=".ui.CreateAccountActivity"
+                  android:launchMode="singleTask"                               
+                  android:windowSoftInputMode="stateHidden"
+                  android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
+        <activity android:name=".ui.ApplicationPreferencesActivity" 
+                  android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
+        <activity android:name=".ui.RedPhoneChooser"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar" 
+                  android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
+        <activity android:name=".ui.CountrySelectionActivity"
+                  android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+                  
+        <activity android:name=".ui.RegistrationProgressActivity"
+                  android:windowSoftInputMode="stateUnchanged"
+                  android:launchMode="singleTask"
+                  android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
+        <activity android:name=".ui.RegistrationProblemsActivity"
+                  android:theme="@style/RedPhone.Light.Dialog"
+                  android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
+        <activity android:name=".ui.CallQualityDialog"
+                  android:theme="@style/RedPhone.Light.Dialog"
+                  android:screenOrientation="portrait"
+                  android:launchMode="singleInstance"/>
+
+        <activity android:name=".ui.CallMetricsInfoActivity"
+                  android:theme="@style/RedPhone.Light.Dialog"
+                  android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
+        <service android:enabled="true" android:name=".RedPhoneService"/>
+        <service android:enabled="true" android:name=".gcm.GCMRegistrationService"/>
+        <service android:enabled="true" android:name=".gcm.GCMIntentService"/>
+        <service android:enabled="true" android:name=".registration.RegistrationService"/>
+        <service android:enabled="true" android:name=".monitor.UploadService"/>
+        <service android:enabled="true" android:name=".monitor.MonitorConfigUpdateService"/>
+
+        <receiver android:name=".call.CallListener"
+                  android:enabled="true"
+                  android:exported="true">
+            <intent-filter android:priority="-1">
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".directory.DirectoryUpdateReceiver"/>
+
+        <receiver android:name=".directory.DirectoryBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".sms.SMSListener"
+                  android:enabled="true"
+                  android:exported="true">
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+                 
+                <action android:name="com.google.android.apps.googlevoice.SMS_RECEIVED"
+                        android:permission="com.google.android.apps.googlevoice.permission.RECEIVE_SMS"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".gcm.GCMBroadcastReceiver"
+                  android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <category android:name="com.securecomcode.voice" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".monitor.MonitorConfigUpdateReceiver" android:exported="false"/>
+
+        <receiver android:name=".registration.RegistrationNotifier"
+                  android:exported="false">
+            <intent-filter>
+                <action android:name="com.securecomcode.voice.REGISTRATION_EVENT" />
+            </intent-filter>            
+        </receiver>
+        
+    </application>
+</manifest>

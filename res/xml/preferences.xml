@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="@string/preferences__general_settings">
+    <CheckBoxPreference android:defaultValue="true"
+                        android:key="pref_prompt_upgrade"
+                        android:title="@string/preferences__prompt_for_call_upgrade"
+                        android:summary="@string/preferences__when_making_insecure_calls_prompt_for_upgrade_to_redphone_if_contact_is_redphone_enabled"/>
+  </PreferenceCategory>
+  <!--<PreferenceCategory android:title="@string/preferences__analytics_settings">
+    <CheckBoxPreference android:defaultValue="false"
+                        android:key="pref_enable_call_metrics_upload"
+                        android:title="@string/preferences__enable_call_metrics_upload"
+                        android:summary="@string/preferences__securely_upload_metrics_to_improve_audio_quality"/>
+    <CheckBoxPreference android:defaultValue="false"
+                        android:key="pref_enable_call_quality_dialog"
+                        android:title="@string/preferences__provide_feeback"
+                        android:summary="@string/preferences__prompt_for_feedback_on_call_quality_after_call_has_ended"/>
+  </PreferenceCategory>-->
+  <PreferenceCategory android:title="@string/preferences__advanced_signaling_settings">
+    <ListPreference android:title="@string/preferences__signaling_method"
+                    android:summary="@string/preferences__modify_the_method_used_to_notify_your_device_of_incoming_calls"
+                    android:key="pref_signaling_method"
+                    android:defaultValue="auto"
+                    android:entries="@array/signaling_method_names"
+                    android:entryValues="@array/signaling_method_values" />      
+  </PreferenceCategory>
+  <PreferenceCategory android:title="@string/preferences__advanced_audio_settings">
+    <CheckBoxPreference android:defaultValue="false"
+                        android:key="pref_audio_compat"
+                        android:summary="@string/preferences__enable_audio_compatibility_mode_higher_latency"
+                        android:title="@string/preferences__compatibility_mode" />
+    <CheckBoxPreference android:defaultValue="false"
+                        android:key="pref_speaker_incall"
+                        android:title="@string/preferences__use_in_call_audio_mode"
+                        android:summary="@string/preferences__enable_if_audio_comes_from_rear_speaker" />
+    <CheckBoxPreference android:defaultValue="false"
+                        android:key="pref_singlethread"
+                        android:title="@string/preferences__single_thread_mode"
+                        android:summary="@string/preferences__may_improve_performance_on_some_devices" />
+    <CheckBoxPreference android:defaultValue="false"
+                        android:key="pref_min_latency"
+                        android:title="@string/preferences__force_minimum_latency"
+                        android:summary="@string/preferences__reduce_latency_at_the_expense_of_audio_quality" />
+    <CheckBoxPreference android:defaultValue="false"
+                        android:key="pref_bluetooth_enabled"
+                        android:title="@string/preferences__disable_bluetooth"
+                        android:summary="@string/preferences__disable_bluetooth_summary"/>
+  </PreferenceCategory>
+</PreferenceScreen>
+

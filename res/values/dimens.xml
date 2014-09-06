@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="incoming_widget_outer_radius">135dip</dimen>
+    <dimen name="incoming_widget_horizontal_offset">0dip</dimen>
+    <dimen name="incoming_widget_vertical_offset">20dip</dimen>
+    <dimen name="incoming_widget_hit_radius">60dip</dimen>
+    <dimen name="incoming_widget_snap_margin">20dip</dimen>
+
+    <!-- Height of the main row of in-call buttons. -->
+    <dimen name="in_call_button_height">76dp</dimen>
+
+    <!-- Padding at the left and right edges of the incall_touch_ui button
+         cluster.  This padding is necessary because we can't allow the
+         buttons to be very close to the edges of the screen, due to the
+         risk of false touches (from your finger wrapping around while
+         holding the phone, *before* moving it up to your face and having
+         the prox sensor kick in.) -->
+    <dimen name="button_cluster_side_padding">20dp</dimen>
+    <dimen name="dialpad_key_plus_size">15dp</dimen>
+    <dimen name="dialpad_key_letters_width">41dp</dimen>
+    <dimen name="dialpad_key_letters_size">11dp</dimen>
+    <dimen name="dialpad_key_numbers_size">40dp</dimen>
+    <dimen name="dialpad_vertical_margin">2dip</dimen>
+    <integer name="dialpad_layout_weight_digits">15</integer>
+    <integer name="dialpad_layout_weight_dialpad">65</integer>
+    <dimen name="fake_menu_button_min_width">56dp</dimen>
+    <dimen name="fake_action_bar_height">60dp</dimen>
+    <dimen name="dialpad_key_special_characters_size">25dp</dimen>
+    <dimen name="dialpad_digits_text_size">35sp</dimen>
+
+</resources>

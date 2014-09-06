@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="transparent">#00000000</color>
+    <color name="black">#ff000000</color>
+    <color name="redphone_holo_blue_light">#ff33b5e5</color>
+    <!-- Primary color of dialpad text, including the call button -->
+    <color name="dialpad_primary_text_color">#33b5e5</color>
+    <!-- Secondary color of dialpad text (used for the letters corresponding to each digit -->
+    <color name="dialpad_secondary_text_color">#aaaaaa</color>
+    <!-- Background color of new dialpad -->
+    <color name="background_dialpad">#ffffff<!--f2020709--></color>
+    <color name="dialpad_text_color">#f2020709</color>
+</resources>

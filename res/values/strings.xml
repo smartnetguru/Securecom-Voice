@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Securecom Voice</string>
+
+    <string name="RedPhone_id_like_to_call_you_securely_using_redphone_you_can_install_redphone_from_the_play_store_s">I\'d like to call you securely using Securecom Voice. You can install Securecom Voice from the Play Store: %s</string>
+    <string name="RedPhone_answering">Answering...</string>
+    <string name="RedPhone_ending_call">Ending call</string>
+    <string name="RedPhone_dialing">Dialing...</string>
+    <string name="RedPhone_cancelling_call">Cancelling call</string>
+    <string name="RedPhone_call_rejected">Call rejected</string>
+    <string name="RedPhone_ringing">Ringing...</string>
+    <string name="RedPhone_busy">Busy...</string>
+    <string name="RedPhone_connected">Connected</string>
+    <string name="RedPhone_connecting">Connecting...</string>
+    <string name="RedPhone_handshake_failed_exclamation">Handshake failed!</string>
+    <string name="RedPhone_recipient_unavailable">Recipient unavailable</string>
+    <string name="RedPhone_performing_handshake">Performing handshake...</string>
+    <string name="RedPhone_server_failed_exclamation">Server failed!</string>
+    <string name="RedPhone_client_failed">Client failed</string>
+    <string name="RedPhone_login_failed_exclamation">Login failed!</string>
+    <string name="RedPhone_message_from_the_server">Message from the server:</string>
+    <string name="RedPhone_number_not_registered_with_redphone_exclamation">Number not registered with Securecom Voice!</string>
+    <string name="RedPhone_the_number_you_dialed_is_not_registered_with_redphone_both_parties_of_a_call_need_to_have_redphone_installed">The number you dialed is not registered with Securecom Voice.  Both parties of a call need to have Securecom Voice installed in order to have a secure conversation.  Would you like to send a Securecom Voice install link to the contact you were trying to dial?</string>
+    <string name="RedPhone_no_thanks_exclamation">No thanks!</string>
+    <string name="RedPhone_yes_exclamation">Yes!</string>
+    <string name="RedPhone_codec_failed_to_initialize">Codec Failed to Initialize</string>
+
+    <string name="RedPhoneService_missed_redphone_call">Missed Securecom Voice Call</string>
+
+    <string name="MicrophoneReader_microphone_failed_to_initialize_try_changing_audio_call_mode_in_settings">Microphone failed to initialize.  Try changing Audio Call Mode in Settings?</string>
+
+    <string name="RobustAudioTrack_audiotrack_did_not_initialize">AudioTrack did not initialize</string>
+
+    <string name="AboutActivity_about_redphone">About Securecom Voice</string>
+    <string name="AboutActivity_redphone_beta_s">Securecom Voice Beta %s</string>
+
+    <string name="ApplicationPreferencesActivity_redphone_settings">Securecom Voice Settings</string>
+    <string name="ApplicationPreferencesActivity_updating_signaling_method">Updating Signaling Method</string>
+    <string name="ApplicationPreferencesActivity_changing_signaling_method_this_could_take_a_second">Changing signaling method, this could take a second...</string>
+    <string name="ApplicationPreferencesActivity_error_registering_with_c2dm_server">Error registering with C2DM server...</string>
+    <string name="ApplicationPreferencesActivity_error_unregistering_with_c2dm_server">Error unregistering with C2DM server...</string>
+    <string name="ApplicationPreferencesActivity_error_communicating_with_c2dm_server">Error communicating with C2DM server...</string>
+
+    <string name="CallMetricsInfo__metrics_collection_details">To help improve call quality, you can choose to send Open WhisperSystems information that will help us to better understand Securecom Voice\'s performance.  This data is never visible to a third party.  All call metrics data is encrypted before it is stored or uploaded to Open WhisperSystem\'s servers.  When enabled, the following information is collected during each call:</string>
+    <string name="CallMetricsInfo__title">Quality Metrics</string>
+    <string name="CallMetricsInfo__device_description">Device Description</string>
+    <string name="CallMetricsInfo__device_description_explanation">Model, manufacturer, carrier, connection type, OS version, persistent random UUID</string>
+    <string name="CallMetricsInfo__mic_and_codec_performance">Microphone and Codec Performance</string>
+    <string name="CallMetricsInfo__mic_and_codec_performance_explanation">Mic clipping, dropped audio samples, average call volume</string>
+    <string name="CallMetricsInfo__packet_arrival">Packet arrival interval histogram</string>
+    <string name="CallMetricsInfo__packet_arrival_explanation">Provides data on network latency jitter</string>
+    <string name="CallMetricsInfo__out_of_order_arrival">Out of order arrival counts</string>
+    <string name="CallMetricsInfo__out_of_order_arrival_explanation">Tracks packet delivery irregularities</string>
+    <string name="CallMetricsInfo__audio_gap_fill_counts">Audio Gap Fills</string>
+    <string name="CallMetricsInfo__audio_gap_fill_counts_explanation">Indicates when missing data required audio to be synthesized</string>
+    <string name="CallMetricsInfo__system_metrics">System Metrics</string>
+    <string name="CallMetricsInfo__system_metrics_explanation">CPU load, memory usage</string>
+
+    <string name="CallQualityDialog_call_feedback">Call Feedback</string>
+    <string name="CallQualityDialog_call_quality">Call Quality</string>
+    <string name="CallQualityDialog_call_quality_rating">Call Quality Rating</string>
+    <string name="CallQualityDialog__i_would_like_to_help_by_sending_performance_statistics">Send performance metrics</string>
+    <string name="CallQualityDialog__i_would_like_to_rate_the_quality_of_my_call_once_it_is_over">Allow me to rate calls after they complete</string>
+    <string name="CallQualityDialog__provide_call_quality_feedback">Provide call quality feedback</string>
+    <string name="CallQualityDialog__redphone">Securecom Voice</string>
+    <string name="CallQualityDialog__we_re_making_changes">We\'re Making Changes</string>
+    <string name="CallQualityDialog__whispersystems_needs_your_help_pretext">Open WhisperSystems needs your help. As we work to improve the quality of our calls, we need feedback and performance metrics to improve the system. </string>
+    <string name="CallQualityDialog__linktext">Learn more about data collection</string>
+    <string name="CallQualityDialog__whispersystems_needs_your_help_posttext">.\n\nOpt in below to help make Securecom Voice better.</string>
+    <string name="CallQualityDialog__you_can_update_these_settings_at_any_time_through_the_general_settings_menu">You can update these preferences at any time through the Securecom Voice settings menu</string>
+    <string name="CallQualityDialog__please_rate_the_audio_quality_of_the_call_below">Please rate the quality of this call</string>
+    <string name="CallQualityDialog__submit">Submit</string>
+    <string name="CallQualityDialog__select_the_issues_that_affected_this_call">Select the issues that affected this call</string>
+    <string name="CallQualityDialog__done">Done</string>
+
+    <string name="CallScreen_incoming_call">Incoming call...</string>
+    <string name="CallScreen_audio_menu_handset">Handset</string>
+    <string name="CallScreen_audio_menu_speaker">Speaker</string>
+    <string name="CallScreen_audio_menu_headset">Bluetooth</string>
+
+    <string name="ContactsListActivity_loading">Loading...</string>
+    <string name="ContactsListActivity_no_contacts_found">No contacts found.</string>    
+    
+    <string name="CreateAccountActivity_register_your_redphone">Register your Securecom Voice</string>
+    <string name="CreateAccountActivity_you_must_specify_your_phone_number">You must specify your phone number!</string>    
+    <string name="CreateAccountActivity_select_your_country">Select your country</string>
+    <string name="CreateAccountActivity_you_must_specify_your_country_code">You must specify your country code</string>
+    <string name="CreateAccountActivity_the_number_you_specified_s_is_invalid">The number you specified (%s) is invalid.</string>
+    <string name="CreateAccountActivity_invalid_number">Invalid number</string>
+    <string name="CreateAccountActivity_we_will_now_verify_that_the_following_number_is_associated">We will now verify that the following number is associated with this device:\n\n%s\n\nIs this number correct, or would you like to edit it before continuing?</string>
+    <string name="CreateAccountActivity_continue">Continue</string>
+    <string name="CreateAccountActivity_edit">Edit</string>
+
+    <string name="NotificationBarManager_redphone_call_in_progress">Securecom Voice call in progress</string>
+    <string name="NotificationBarManager_missed_redphone_call_from_s">Missed Securecom Voice call from %s</string>
+    <string name="NotificationBarManager_missed_redphone_call">Missed Securecom Voice call</string>
+    
+    <string name="QualityReporting_would_you_like_to_send_diagnostic_information_about_this_call_to_whisper_systems">Would you like to send diagnostic information about this call to Whisper Systems?</string>
+    <string name="QualityReporting_never">Never</string>
+    <string name="QualityReporting_send_diagnostics">Send Diagnostics?</string>
+
+    <string name="RecentCallListActivity_loading">Loading...</string>
+    <string name="RecentCallListActivity_empty_call_log">Empty call log.</string>    
+    
+    <string name="RedPhoneChooser_upgrade_to_redphone">Secure with Securecom Voice?</string>
+    <string name="RedPhoneChooser_this_contact_also_uses_redphone_would_you_like_to_upgrade_to_a_secure_call">This contact also uses Securecom Voice. Would you like to secure this call?</string>
+    <string name="RedPhoneChooser_secure_call">Yes, secure</string>
+    <string name="RedPhoneChooser_insecure_call">No</string>
+    
+    <string name="RegistrationProgressActivity_verifying_number">Verifying number</string>
+    <string name="RegistrationProgressActivity_edit_s">Edit %s</string>
+    <string name="RegistrationProgressActivity_registration_complete">Registration complete!</string>
+    <string name="RegistrationProgressActivity_possible_problems">Possible problems.</string>
+    <string name="RegistrationProgressActivity_you_must_enter_the_code_you_received_first">You must enter the code you received first...</string>
+    <string name="RegistrationProgressActivity_connecting">Connecting</string>
+    <string name="RegistrationProgressActivity_connecting_for_verification">Connecting for verification...</string>
+    <string name="RegistrationProgressActivity_network_error">Network Error!</string>
+    <string name="RegistrationProgressActivity_unable_to_connect">Unable to connect. Please check your network connection and try again.</string>
+    <string name="RegistrationProgressActivity_verification_failed">Verification Failed!</string>
+    <string name="RegistrationProgressActivity_the_verification_code_you_submitted_is_incorrect">The verification code you submitted is incorrect. Please try again.</string>
+    <string name="RegistrationProgressActivity_too_many_attempts">Too many attempts</string>
+    <string name="RegistrationProgressActivity_youve_submitted_an_incorrect_verification_code_too_many_times">You\'ve submitted an incorrect verification code too many times. Please wait a minute before trying again.</string>
+    <string name="RegistrationProgressActivity_requesting_call">Requesting Call</string>
+    <string name="RegistrationProgressActivity_requesting_incoming_call">Requesting incoming verification call...</string>
+    <string name="RegistrationProgressActivity_server_error">Server Error</string>
+    <string name="RegistrationProgressActivity_the_server_encountered_an_error">The server encountered an error. Please try again.</string>
+    <string name="RegistrationProgressActivity_too_many_requests">Too Many Requests!</string>
+    <string name="RegistrationProgressActivity_youve_already_requested_a_voice_call">You\'ve already recently requested a voice call. You can request another in 20 minutes.</string>
+    <string name="RegistrationProgressActivity_verifying_voice_code">Verifying voice code...</string>
+
+    <string name="RegistrationProblemsActivity_possible_problems">Possible Problems</string>
+
+    <string name="RegistrationService_registration_complete">Registration complete</string>
+    <string name="RegistrationService_redphone_registration_has_successfully_completed">Securecom Voice registration has successfully completed.</string>
+    <string name="RegistrationService_registration_error">Registration error</string>
+    <string name="RegistrationService_redphone_registration_has_encountered_a_problem">Securecom Voice registration has encountered a problem.</string>
+    
+    <string name="about_activity__additional_information">Additional information:</string>
+    <string name="about_activity__attribution">Attribution:</string>
+    <string name="about_activity__aboutText">Copyright 2014 Securecom. Licensed under the GPL version 3</string>
+    <string name="about_activity__attributionText">Redphone Copyright 2012-2014 Open WhisperSystems. Licensed under the GPL version 3. \n\nSecurecom Voice links to the SpanDSP library, which is licensed under the LGPL.\n\nSecurecom Voice uses the SPEEX Codec, which is used under the Xiph.Org variant of the BSD license: © 2002-2003, Jean-Marc Valin/Xiph.Org Foundation\n\nRedistribution and use of the SPEEX library in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n\t* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n\t* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n\t* Neither the name of the Xiph.org Foundation nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.\n\nThe SPEEX library is provided by the copyright holders and contributors “as is” and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the foundation or contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.\n\n\nSome sound samples are licensed under the Creative Commons Sampling Plus License: http://creativecommons.org/licenses/sampling+/1.0/\n\nBy acclivity (http://www.freesound.org/usersViewSingle.php?id=37876):\nShipsBell.wav (http://www.freesound.org/samplesViewSingle.php?id=32304)\n\nBy Splashdust (http://www.freesound.org/usersViewSingle.php?id=754949):\nnegativebeep.wav (http://www.freesound.org/samplesViewSingle.php?id=67454)\n\nBy Peter_Gross (http://www.freesound.org/usersViewSingle.php?id=33429):\nSonar_pings.ogg (http://www.freesound.org/samplesViewSingle.php?id=12677\n\nBy suonho: http://www.freesound.org/samplesViewSingle.php?id=58348: ambienta_soundtrack_moog_sweep\n\nBy Mike Koenig: Busy Signal</string>
+
+    <string name="call_controls__redphone_call">SECURECOM VOICE CALL</string>
+
+    <string name="call_card__redphone_call">Securecom Voice Call</string>
+
+    <string name="create_account__register">Register</string>
+    <string name="create_acount__please_confirm_your_country_code_and_phone_number">In order to make and receive secure calls, Securecom Voice needs to verify you and register it with the system.\n\nPlease confirm your country and contact information.</string>
+    <string name="create_account__your_country">YOUR COUNTRY</string>
+    <string name="create_account__your_country_code_and_phone_number">YOUR COUNTRY CODE AND PHONE NUMBER</string>
+    <string name="create_account__phone_number">phone number</string>
+    
+    <string name="contacts_list_content__search">Search</string>
+
+    <string name="country_selection_fragment__search">Search...</string>
+    <string name="country_selection_fragment__loading_countries">Loading countries...</string>
+    
+    <string name="outbound_chooser__you_ve_initiated_a_call_with_a_contact_who_also_uses_redphone_would_you_like_to_upgrade_this_to_a_redphone_call">You\'ve initiated a call with a contact who also uses Securecom Voice. Would you like to upgrade this to a Securecom Voice call?</string>
+    <string name="outbound_chooser__secure_call">Secure Call</string>
+    <string name="outbound_chooser__insecure_call">Insecure Call</string>
+    
+    <string name="about_menu__about">About</string>
+    
+    <string name="contact_list_options_menu__search">Search</string>
+
+    <string name="dialer_options_menu__re_register">Re-register</string>
+    <string name="dialer_options_menu__about">About</string>
+    <string name="dialer_options_menu__settings">Settings</string>
+    
+    <string name="array__google_push_notifications">Google push notifications</string>
+    <string name="array__sms_push_notifications">SMS push notifications</string>
+    <string name="array__auto_recommended">Auto (recommended)</string>
+    
+    <string name="preferences__general_settings">General Settings</string>
+    <string name="preferences__prompt_for_call_upgrade">Prompt for call upgrade</string>
+    <string name="preferences__when_making_insecure_calls_prompt_for_upgrade_to_redphone_if_contact_is_redphone_enabled">When making insecure calls, prompt for upgrade to Securecom Voice if contact is Securecom Voice-enabled.</string>
+    <string name="preferences__advanced_signaling_settings">Advanced: Signaling Settings</string>
+    <string name="preferences__advanced_audio_settings">Advanced: Audio Settings</string>
+    <string name="preferences__enable_audio_compatibility_mode_higher_latency">Enable Audio Compatibility Mode [higher latency]</string>
+    <string name="preferences__compatibility_mode">Compatibility Mode</string>
+    <string name="preferences__use_in_call_audio_mode">Use In-Call Audio Mode</string>
+    <string name="preferences__enable_if_audio_comes_from_rear_speaker">Enable if audio comes from rear speaker</string>
+    <string name="preferences__single_thread_mode">Single-Thread Mode</string>
+    <string name="preferences__may_improve_performance_on_some_devices">May improve performance on some devices</string>
+    <string name="preferences__force_minimum_latency">Force minimum latency</string>
+    <string name="preferences__reduce_latency_at_the_expense_of_audio_quality">Reduce latency at the expense of audio quality</string>
+    <string name="preferences__signaling_method">Signaling Method</string>
+    <string name="preferences__modify_the_method_used_to_notify_your_device_of_incoming_calls">Modify the method used to notify your device of incoming calls.</string>
+    <string name="preferences__analytics_settings">Analytics Settings</string>
+    <string name="preferences__enable_call_metrics_upload">Send Data</string>
+    <string name="preferences__enable_call_quality_dialog">Provide Feedback</string>
+    <string name="preferences__provide_feeback">Provide Feedback</string>
+    <string name="preferences__prompt_for_feedback_on_call_quality_after_call_has_ended">Prompt for feedback on call quality after call has ended</string>
+    <string name="preferences__securely_upload_metrics_to_improve_audio_quality">Securely upload metrics to improve audio quality</string>
+    <string name="preferences__disable_bluetooth">Enable Bluetooth</string>
+    <string name="preferences__disable_bluetooth_summary">Disabling Bluetooth may resolve audio issues on some devices</string>
+
+    <string name="registration_progress__sms_verification_failed">SMS verification failed.</string>
+    <string name="registration_progress__redphone_timed_out_while_waiting_for_an_sms_message_to_verify_your_phone_number">Securecom Voice timed out while waiting for an SMS message to verify your phone number.</string>
+    <string name="registration_progress__edit_number">Edit Number</string>
+    <string name="registration_progress__some_possible_problems_include">Some possible problems include:</string>
+    <string name="registration_progress__sms_interceptors">SMS Interceptors.</string>
+    <string name="registration_progress__some_third_party_text_messaging_clients_explanation">Some third party text messaging clients, such as Handcent or GoSMS, behave poorly and intercept all incoming SMS messages.  Check to see if you received a text message that starts with \'A Securecom Voice is trying to verify you\' in which case you\'ll need to configure your third party text messaging app to let text messages through.</string>
+    <string name="registration_progress__incorrect_number">Incorrect Number.</string>
+    <string name="registration_progress__please_check_to_make_sure_you_entered_your_number_correctly">Please check to make sure you entered your number correctly, and that it is formatted for correctly your region.</string>
+    <string name="registration_progress__old_versions_of_google_voice">Old versions of Google Voice.</string>
+    <string name="registration_progress__if_youre_attempting_to_register_a_google_voice_number_explanation">If you\'re attempting to register a Google Voice number, ensure that you are running the most recent version of the Google Voice app.</string>
+    <string name="registration_progress__connectivity_error">Connectivity error.</string>
+    <string name="registration_progress__redphone_was_unable_to_connect_to_the_switch">Securecom Voice was unable to connect to the switch.</string>
+    <string name="registration_progress__no_network_connectivity">No network connectivity.</string>
+    <string name="registration_progress__your_device_needs_network_connectivity_explanation">Your device needs network connectivity in order to use Securecom Voice.  Check to ensure that it is connected to the internet.</string>
+    <string name="registration_progress__restrictive_firewall">Restrictive firewall.</string>
+    <string name="registration_progress__if_you_are_connected_via_wifi_explanation">If you are connected via wifi, it\'s possible that there is a firewall blocking access to the Securecom Voice signaling ports.  Try another network or mobile data.</string>
+    <string name="registration_progress__redphone_will_now_automatically_verify_your_number_with_a_confirmation_sms_message">Securecom Voice will now automatically verify your number with a confirmation SMS message.</string>
+    <string name="registration_progress__registering_with_server">Registering with server...</string>
+    <string name="registration_progress__waiting_for_sms_verification">Waiting for SMS verification...</string>
+    <string name="registration_progress__this_could_take_a_moment_please_be_patient_well_notify_you_when_verification_is_complete">This could take a moment. Please be patient, we\'ll notify you when verification is complete.</string>
+    <string name="registration_progress__waiting_for_sms">WAITING FOR SMS</string>
+    <string name="registration_progress__voice_verification">Voice Verification</string>
+    <string name="registration_progress__redphone_can_also_call_you_to_verify_your_number">Securecom Voice can also call you to verify your number. Tap \'Call Me\' and enter the six digit code that you hear below.</string>
+    <string name="registration_progress__verify">Verify</string>
+    <string name="registration_progress__call_me">Call Me</string>
+    <!-- The digit to be displayed on the 0 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_0_number">0</string>
+    <!-- The digit to be displayed on the 1 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_1_number">1</string>
+    <!-- The digit to be displayed on the 2 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_2_number">2</string>
+    <!-- The digit to be displayed on the 3 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_3_number">3</string>
+    <!-- The digit to be displayed on the 4 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_4_number">4</string>
+    <!-- The digit to be displayed on the 5 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_5_number">5</string>
+    <!-- The digit to be displayed on the 6 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_6_number">6</string>
+    <!-- The digit to be displayed on the 7 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_7_number">7</string>
+    <!-- The digit to be displayed on the 8 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_8_number">8</string>
+    <!-- The digit to be displayed on the 9 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_9_number">9</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_star_number">*</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_pound_number">#</string>
+
+    <!--  Do not translate. -->
+    <string name="dialpad_0_letters">+</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_1_letters"></string>
+    <!--  Do not translate. -->
+    <string name="dialpad_2_letters">ABC</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_3_letters">DEF</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_4_letters">GHI</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_5_letters">JKL</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_6_letters">MNO</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_7_letters">PQRS</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_8_letters">TUV</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_9_letters">WXYZ</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_star_letters"></string>
+    <!--  Do not translate. -->
+    <string name="dialpad_pound_letters"></string>
+    <string name="description_delete_button">backspace</string>
+    <string name="description_dial_button">dial</string>
+    <string name="registration_spinner_label">Choose an option to register</string>
+    <string-array name="registration_options">
+        <item>Phone Number</item>
+        <item>Email</item>
+    </string-array>
+    <string name="registration_activity__your_email">YOUR EMAIL</string>
+    <string name="registration_activity__email_address">yourname@yourmail.com</string>
+    <string name="RegistrationActivity_you_must_specify_your_email">You must specify your email address</string>
+    <string name="RegistrationActivity_you_must_specify_your_country"> You must select your country</string>
+    <string name="RegistrationActivity_invalid_email_address">Invalid Email address</string>
+    <string name="RegistrationActivity_the_email_you_specified_s_is_invalid">The email address you
+        specified (%s) is invalid.
+    </string>
+    <string name="RegistrationActivity_we_will_now_verify_that_the_following_email_is_associated_with_your_device_s">
+        We will now verify that the following email address is associated with this device:\n\n%s\n\n
+        Is this email address correct, or would you like to edit it before continuing?
+    </string>
+    <string name="RegistrationProgressActivity_verifying_email">Verifying email address</string>
+    <string name="registration_progress_activity__waiting_for_email_verification">Waiting for Email
+        verification...
+    </string>
+    <string name="registration_progress_activity__sms_verification">SMS Verification</string>
+    <string name="registration_progress_activity__sms_you_to_verify_your_number">
+        Securecom Voice would send SMS to verify you. Enter the six digit
+        code that you receive and tap verify.
+    </string>
+    <string name="registration_progress_activity__verify">Verify</string>
+    <string name="registration_progress_activity__edit_number">Edit number</string>
+    <string name="registration_progress_activity__timed_out_while_waiting_for_a_verification_sms_message">
+        Securecom Voice timed out while waiting for a verification SMS message.
+    </string>
+    <string name="registration_progress_activity__timed_out_while_waiting_for_a_verification_email_message">
+        Securecom Voice timed out while waiting for a verification Email message.
+    </string>
+    <string name="registration_progress_activity__email_verification_failed">Email verification
+        failed.
+    </string>
+    <string name="registration_progress_activity__email_verification">Email Verification</string>
+    <string name="registration_progress_activity__email_you_to_verify_your_number">
+        Securecom Voice would send Email to verify you. Enter the six digit
+        code that you receive and tap verify.
+    </string>
+    <string name="RegistrationActivity_you_must_specify_your_verification_code">You must specify verification code
+    </string>
+
+    <!-- EOF -->
+</resources>
