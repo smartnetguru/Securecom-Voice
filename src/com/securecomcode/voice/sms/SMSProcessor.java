@@ -38,7 +38,7 @@ public class SMSProcessor {
   private static final String INITIATE_PREFIX    = "RedPhone call:";
   private static final String GV_INITIATE_PREFIX = "^\\+[0-9]+ \\- " + INITIATE_PREFIX + ".+";
 
-  private static final String VERIFY_PREFIX      = "A RedPhone is trying to verify you:";
+  private static final String VERIFY_PREFIX      = "Securecom Voice is trying to verify you:";
   private static final String GV_VERIFY_PREFIX   = "^\\+[0-9]+ \\- " + VERIFY_PREFIX + ".+";
 
   public static String checkMessagesForVerification(String[] messages) {
