@@ -116,7 +116,7 @@ public class CreateAccountActivity extends SherlockActivity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == PICK_COUNTRY && resultCode == RESULT_OK && data != null) {
-        if(PreferenceManager.getDefaultSharedPreferences(this).getString(Constants.COUNTRY_CODE_SELECTED, "").equalsIgnoreCase("Phone")){
+        if(PreferenceManager.getDefaultSharedPreferences(this).getString(Constants.COUNTRY_CODE_SELECTED, "").equalsIgnoreCase("")){
             this.countryCode.setText(data.getIntExtra("country_code", 1)+"");
         }
       setCountryDisplay(data.getStringExtra("country_name"));

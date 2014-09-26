@@ -114,8 +114,7 @@ public class Util {
       String localNumber = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
               .getLine1Number();
 
-      if (!isEmpty(localNumber) &&
-             !localNumber.startsWith("+")) {
+      if (!isEmpty(localNumber)) {
           if (localNumber.length() == 10) localNumber = "+1" + localNumber;
           else localNumber = "+" + localNumber;
 
