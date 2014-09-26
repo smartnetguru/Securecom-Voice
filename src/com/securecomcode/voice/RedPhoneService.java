@@ -233,7 +233,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     handleMissedCall(extractRemoteNumber(intent));
 
     try {
-      SignalingSocket signalingSocket = new SignalingSocket(this, session.getFullServerName(),
+      SignalingSocket signalingSocket = new SignalingSocket(this, Release.MASTER_SERVER_HOST,
                                                             Release.SERVER_PORT,
                                                             localNumber, password,
                                                             OtpCounterProvider.getInstance());
