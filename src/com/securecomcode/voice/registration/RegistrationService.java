@@ -92,6 +92,7 @@ public class RegistrationService extends Service {
 
     private volatile Handler registrationStateHandler;
     private volatile ChallengeReceiver receiver;
+    private static volatile Directory directory;
     private String challenge;
     private long verificationStartTime;
 
@@ -271,7 +272,13 @@ public class RegistrationService extends Service {
     }
 
     public static void refreshDirectory(final Context context, final AccountCreationSocket socket, final String localNumber) {
-        Directory directory = Directory.getInstance(context);
+        if(directory == null){
+            directory = Directory.getInstance(context);
+        }else{
+            directory.doDatabaseReset(context);
+            directory = Directory.getInstance(context);
+        }
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putString("LOCALNUMBER", localNumber).commit();
 

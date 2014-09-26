@@ -94,6 +94,11 @@ public class Directory {
         }
     }
 
+    public void doDatabaseReset(Context context){
+        context.deleteDatabase(DATABASE_NAME);
+        instance = null;
+    }
+
     public Set<String> getPushEligibleContactNumbers(String localNumber, String countryCode) {
         final Uri uri = Phone.CONTENT_URI;
         final Set<String> results = new HashSet<String>();
