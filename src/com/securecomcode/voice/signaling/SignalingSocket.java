@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Whisper Systems]
+ * Copyright (C) 2011 Whisper Systems
  * Copyright (C) 2014 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@ import android.util.Log;
 import com.securecomcode.voice.contacts.ContactTokenDetails;
 import com.securecomcode.voice.contacts.ContactTokenDetailsList;
 import com.securecomcode.voice.contacts.ContactTokenList;
+import com.securecomcode.voice.signaling.signals.CallSignalStateListener;
 import com.securecomcode.voice.signaling.signals.GetContactsSignal;
 import com.securecomcode.voice.sms.IncomingCallDetails;
 import com.google.thoughtcrimegson.Gson;
@@ -55,6 +56,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -91,6 +93,7 @@ public class SignalingSocket {
   private   final String signalingHost;
   private   final int    signalingPort;
   private   boolean closed = false;
+  private   CallSignalStateListener callSignalStateListener;
 
   protected final LineReader lineReader;
   protected final OutputStream outputStream;
@@ -108,15 +111,16 @@ public class SignalingSocket {
         Release.SERVER_PORT,
         PreferenceManager.getDefaultSharedPreferences(context).getString(Constants.NUMBER_PREFERENCE, "NO_SAVED_NUMBER!"),
         PreferenceManager.getDefaultSharedPreferences(context).getString(Constants.PASSWORD_PREFERENCE,  "NO_SAVED_PASSWORD!"),
-        null);
+        null, null);
   }
 
   public SignalingSocket(Context context, String host, int port,
                          String localNumber, String password,
-                         OtpCounterProvider counterProvider)
+                         OtpCounterProvider counterProvider, CallSignalStateListener cssl)
       throws SignalingException
   {
     try {
+      this.callSignalStateListener   = cssl;
       this.context                   = context.getApplicationContext();
       this.connectionAttemptComplete = false;
       this.signalingHost             = host;
@@ -161,7 +165,7 @@ public class SignalingSocket {
       throw new SignalingException(ioe);
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalArgumentException(e);
-    } catch (KeyStoreException e) {
+    } catch (KeyStoreException e ) {
       throw new IllegalArgumentException(e);
     } catch (CertificateException e) {
       throw new IllegalArgumentException(e);
@@ -179,6 +183,10 @@ public class SignalingSocket {
     Socket stagedSocket          = LowLatencySocketConnector.connect(addresses, port);
 
     Log.w("SignalingSocket", "Connected to: " + stagedSocket.getInetAddress().getHostAddress());
+
+    if(callSignalStateListener != null) {
+        callSignalStateListener.notifyConnectedSending();
+    }
 
     SocketConnectMonitor monitor = new SocketConnectMonitor(stagedSocket);
 

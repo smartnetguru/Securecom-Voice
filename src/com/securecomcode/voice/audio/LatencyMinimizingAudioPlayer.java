@@ -27,7 +27,7 @@ import com.securecomcode.voice.ui.ApplicationPreferencesActivity;
 import com.securecomcode.voice.util.LeakyIntegrator;
 
 /**
- * LatencyMinimizingAudioPlayer transfers audio data from an audio source to and audio sink
+ * LatencyMinimizingAudioPlayer transfers audio data from an audio source to an audio sink
  * It attempts to learn the minimum desired buffer level the sink can have while avoiding
  * underflows.  Data is only read from the source when needed to refill the sink to the desired
  * buffer level.  The audio source must always provide new audio data when requested, and must

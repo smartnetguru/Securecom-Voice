@@ -12,6 +12,8 @@
     <string name="RedPhone_busy">Busy...</string>
     <string name="RedPhone_connected">Connected</string>
     <string name="RedPhone_connecting">Connecting...</string>
+    <string name="RedPhone_connected_sending">Connected, sending...</string>
+    <string name="RedPhone_connected_waiting">Connected, waiting...</string>
     <string name="RedPhone_handshake_failed_exclamation">Handshake failed!</string>
     <string name="RedPhone_recipient_unavailable">Recipient unavailable</string>
     <string name="RedPhone_performing_handshake">Performing handshake...</string>
@@ -173,6 +175,8 @@
     
     <string name="preferences__general_settings">General Settings</string>
     <string name="preferences__prompt_for_call_upgrade">Prompt for call upgrade</string>
+    <string name="preferences__prompt_for_during_call_screen_disable">Disable screen during call</string>
+    <string name="preferences__prompt_for_during_call_screen_disable_description">Use proximity sensor to disable screen, preventing accidental touch events</string>
     <string name="preferences__when_making_insecure_calls_prompt_for_upgrade_to_redphone_if_contact_is_redphone_enabled">When making insecure calls, prompt for upgrade to Securecom Voice if contact is Securecom Voice-enabled.</string>
     <string name="preferences__advanced_signaling_settings">Advanced: Signaling Settings</string>
     <string name="preferences__advanced_audio_settings">Advanced: Audio Settings</string>
@@ -315,6 +319,8 @@
     </string>
     <string name="RegistrationActivity_you_must_specify_your_verification_code">You must specify verification code
     </string>
+    <string name="Warning_turn_on_packet_data_or_use_wi_fi_to_complete_this_action">Turn on packet data or use Wi-Fi to complete this action</string>
+    <string name="Warning_title_cellular_data_is_turned_off">Cellular Data is turned OFF</string>
 
     <!-- EOF -->
 </resources>

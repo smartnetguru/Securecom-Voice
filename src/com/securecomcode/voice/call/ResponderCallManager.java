@@ -71,7 +71,7 @@ public class ResponderCallManager extends CallManager {
                                             Release.RELAY_SERVER_HOST,
                                             Release.SERVER_PORT,
                                             localNumber, password,
-                                            OtpCounterProvider.getInstance());
+                                            OtpCounterProvider.getInstance(), null);
 
       signalingSocket.setRinging(sessionDescriptor.sessionId);
       callStateListener.notifyCallFresh();
@@ -111,7 +111,7 @@ public class ResponderCallManager extends CallManager {
     } catch( RuntimeException e ) {
       Log.e( "ResponderCallManager", "Died unhandled with exception!");
       Log.w( "ResponderCallManager", e );
-      callStateListener.notifyClientFailure();
+      callStateListener.notifyClientFailure("");
     }
   }
 

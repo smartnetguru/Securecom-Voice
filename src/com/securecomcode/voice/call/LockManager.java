@@ -8,6 +8,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 import com.securecomcode.voice.Release;
+import com.securecomcode.voice.ui.ApplicationPreferencesActivity;
 
 /**
  * Maintains wake lock state.
@@ -23,11 +24,13 @@ public class LockManager {
   private final ProximityLock proximityLock;
 
   private final AccelerometerListener accelerometerListener;
+  private final ProximityListener proximityListener;
   private final boolean wifiLockEnforced;
 
   private boolean keyguardDisabled;
 
   private int orientation = AccelerometerListener.ORIENTATION_UNKNOWN;
+  private final Context context;
 
   public enum PhoneState {
     IDLE,
@@ -44,6 +47,7 @@ public class LockManager {
   }
 
   public LockManager(Context context) {
+    this.context = context;
     PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
     fullLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "RedPhone Full");
     partialLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RedPhone Partial");
@@ -67,6 +71,8 @@ public class LockManager {
         updateInCallLockState();
       }
     });
+
+    proximityListener = new ProximityListener(context);
 
     wifiLockEnforced = isWifiPowerActiveModeEnabled(context);
   }
@@ -93,23 +99,23 @@ public class LockManager {
 
   public void updatePhoneState(PhoneState state) {
     switch(state) {
-      case IDLE:
-        setLockState(LockState.SLEEP);
-        accelerometerListener.enable(false);
-        maybeEnableKeyguard();
-        break;
       case PROCESSING:
         setLockState(LockState.PARTIAL);
         accelerometerListener.enable(false);
+        proximityListener.enable(false);
         maybeEnableKeyguard();
         break;
       case INTERACTIVE:
         setLockState(LockState.FULL);
         accelerometerListener.enable(false);
+        proximityListener.enable(false);
         disableKeyguard();
         break;
       case IN_CALL:
         accelerometerListener.enable(true);
+        if(ApplicationPreferencesActivity.getDisableDisplayPreference(context)){
+            proximityListener.enable(true);
+        }
         updateInCallLockState();
         disableKeyguard();
         break;

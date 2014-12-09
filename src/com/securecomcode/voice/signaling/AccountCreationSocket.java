@@ -45,7 +45,7 @@ public class AccountCreationSocket extends SignalingSocket {
 
     public AccountCreationSocket(Context context, String localNumber, String password)
             throws SignalingException {
-        super(context, Release.MASTER_SERVER_HOST, Release.SERVER_PORT, localNumber, password, null);
+        super(context, Release.MASTER_SERVER_HOST, Release.SERVER_PORT, localNumber, password, null, null);
     }
 
     public void createAccount(boolean voice)

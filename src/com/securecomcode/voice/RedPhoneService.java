@@ -66,6 +66,8 @@ import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.securecomcode.voice.util.Util.isDataConnectionAvailable;
+
 /**
  * The major entry point for all of the heavy lifting associated with
  * setting up, tearing down, or managing calls.  The service spins up
@@ -204,6 +206,12 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
   }
 
   private void handleOutgoingCall(Intent intent) {
+
+    if(!isDataConnectionAvailable(getApplicationContext())){
+        notifyClientFailure(getResources().getString(R.string.Warning_turn_on_packet_data_or_use_wi_fi_to_complete_this_action));
+        return;
+    }
+
     remoteNumber = extractRemoteNumber(intent);
 
     if (remoteNumber == null || remoteNumber.length() == 0)
@@ -211,7 +219,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
 
     sendMessage(RedPhone.HANDLE_OUTGOING_CALL, remoteNumber);
 
-    state = RedPhone.STATE_DIALING;
+    state = RedPhone.STATE_DIALING_CONNECTING;
     lockManager.updatePhoneState(LockManager.PhoneState.INTERACTIVE);
     this.currentCallManager = new InitiatingCallManager(this, this, localNumber, password,
                                                         remoteNumber, zid);
@@ -236,7 +244,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
       SignalingSocket signalingSocket = new SignalingSocket(this, Release.MASTER_SERVER_HOST,
                                                             Release.SERVER_PORT,
                                                             localNumber, password,
-                                                            OtpCounterProvider.getInstance());
+                                                            OtpCounterProvider.getInstance(), null);
 
       signalingSocket.setBusy(session.sessionId);
       signalingSocket.close();
@@ -385,7 +393,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     shutdownAudio();
 
     state = RedPhone.STATE_IDLE;
-    lockManager.updatePhoneState(LockManager.PhoneState.IDLE);
+    lockManager.updatePhoneState(LockManager.PhoneState.INTERACTIVE);
 
     // XXX moxie@thoughtcrime.org -- Do we still need to stop the Service?
 //    Log.d("RedPhoneService", "STOP SELF" );
@@ -532,13 +540,13 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     this.terminate();
   }
 
-  public void notifyClientFailure() {
+  public void notifyClientFailure(String message) {
     if (state == RedPhone.STATE_RINGING)
       handleMissedCall(remoteNumber);
 
     state = RedPhone.STATE_IDLE;
     outgoingRinger.playFailure();
-    sendMessage(RedPhone.HANDLE_CLIENT_FAILURE, null);
+    sendMessage(RedPhone.HANDLE_CLIENT_FAILURE, message);
     this.terminate();
   }
 
@@ -580,7 +588,14 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     outgoingRinger.playSonar();
   }
 
-  public void notifyWaitingForResponder() {}
+    @Override
+    public void notifyConnectedSending() {
+        sendMessage(RedPhone.HANDLE_STATE_CONNECTED_SENDING, remoteNumber);
+    }
+
+    public void notifyWaitingForResponder() {
+        sendMessage(RedPhone.HANDLE_STATE_CONNECTED_WAITING, remoteNumber);
+    }
 
   private void sendMessage(int code, Object extra) {
     Message message = Message.obtain();
@@ -614,7 +629,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     switch(state) {
       case RedPhone.STATE_IDLE:
         return false;
-      case RedPhone.STATE_DIALING:
+      case RedPhone.STATE_DIALING_CONNECTING:
       case RedPhone.STATE_RINGING:
       case RedPhone.STATE_ANSWERING:
       case RedPhone.STATE_CONNECTED:
@@ -635,7 +650,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
       Log.d(TAG, "Uncaught exception - releasing proximity lock", throwable);
-      lockManager.updatePhoneState(LockManager.PhoneState.IDLE);
+      lockManager.updatePhoneState(LockManager.PhoneState.INTERACTIVE);
     }
   }
 }

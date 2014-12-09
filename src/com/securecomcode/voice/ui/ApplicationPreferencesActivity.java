@@ -19,6 +19,7 @@ package com.securecomcode.voice.ui;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -68,6 +69,7 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
   public static final String CALL_QUALITY_QUESTIONS_PREF 	  = "pref_call_quality_questions";
   public static final String USER_ASKED_FOR_FEEDBACK_OPT_IN	= "pref_user_asked_to_opt_int_for_feedback";
   public static final String BLUETOOTH_ENABLED              = "pref_bluetooth_enabled";
+  public static final String DISABLE_SCREEN_IN_CALL = "pref_disable_screen_in_call";
 
   private static final Gson gson = new Gson();
 
@@ -88,6 +90,13 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
 
     initializeListeners();
     initializeDecorators();
+
+    if(this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_PROXIMITY)){
+        getPreferenceScreen().findPreference("pref_disable_screen_in_call").setDefaultValue(true);
+    }else{
+        getPreferenceScreen().findPreference("pref_disable_screen_in_call").setDefaultValue(false);
+    }
+
   }
 
   @Override
@@ -147,6 +156,10 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
   public static boolean getPromptUpgradePreference(Context context) {
     return PreferenceManager
            .getDefaultSharedPreferences(context).getBoolean(OPPORTUNISTIC_UPGRADE_PREF, true);
+  }
+
+  public static boolean getDisableDisplayPreference(Context context){
+    return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(DISABLE_SCREEN_IN_CALL, false);
   }
 
   public static void setSignalingMethod(Context context, String value) {

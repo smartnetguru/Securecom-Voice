@@ -51,6 +51,8 @@ import com.securecomcode.voice.R;
 import com.securecomcode.voice.RedPhone;
 import com.securecomcode.voice.RedPhoneService;
 
+import static com.securecomcode.voice.util.Util.showAlertOnNoData;
+
 public class DialpadFragment extends SherlockFragment implements
 		View.OnClickListener, View.OnLongClickListener, View.OnKeyListener,
 		DialpadKeyButton.OnPressedListener, TextWatcher
@@ -291,6 +293,9 @@ public class DialpadFragment extends SherlockFragment implements
 	 * dial button again, to dial it (general case described above).
 	 */
 	public void dialButtonPressed() {
+        if(!showAlertOnNoData(getActivity())){
+            return;
+        }
 		if (isDigitsEmpty()) { // No number entered.
 			// TODO: Handle this case
 		} else {

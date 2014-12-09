@@ -32,10 +32,13 @@ import com.securecomcode.voice.signaling.ServerMessageException;
 import com.securecomcode.voice.signaling.SessionInitiationFailureException;
 import com.securecomcode.voice.signaling.SignalingException;
 import com.securecomcode.voice.signaling.SignalingSocket;
+import com.securecomcode.voice.signaling.signals.CallSignalStateListener;
 import com.securecomcode.voice.ui.ApplicationPreferencesActivity;
 
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+
+import static com.securecomcode.voice.util.Util.isDataConnectionAvailable;
 
 /**
  * Call Manager for the coordination of outgoing calls.  It initiates
@@ -44,7 +47,7 @@ import java.net.SocketException;
  * @author Moxie Marlinspike
  *
  */
-public class InitiatingCallManager extends CallManager {
+public class InitiatingCallManager extends CallManager implements CallSignalStateListener {
 
   private final String localNumber;
   private final String password;
@@ -64,6 +67,9 @@ public class InitiatingCallManager extends CallManager {
 
   @Override
   public void run() {
+
+   
+
     if( loopbackMode ) {
       runLoopback();
       return;
@@ -72,9 +78,13 @@ public class InitiatingCallManager extends CallManager {
     try {
       callStateListener.notifyCallConnecting();
 
-      signalingSocket = new SignalingSocket(context, Release.RELAY_SERVER_HOST,
-                                            Release.SERVER_PORT, localNumber, password,
-                                            OtpCounterProvider.getInstance());
+      try {
+          signalingSocket = new SignalingSocket(context, Release.RELAY_SERVER_HOST,
+                  Release.SERVER_PORT, localNumber, password,
+                  OtpCounterProvider.getInstance(), this);
+      }catch(SignalingException se){
+          callStateListener.notifyClientFailure(se.getMessage());
+      }
 
       sessionDescriptor = signalingSocket.initiateConnection(remoteNumber);
 
@@ -112,7 +122,7 @@ public class InitiatingCallManager extends CallManager {
     } catch( RuntimeException e ) {
       Log.e( "InitiatingCallManager", "Died with unhandled exception!");
       Log.w( "InitiatingCallManager", e );
-      callStateListener.notifyClientFailure();
+      callStateListener.notifyClientFailure("");
     } catch (SessionInitiationFailureException e) {
       Log.w("InitiatingCallManager", e);
       callStateListener.notifyServerFailure();
@@ -137,8 +147,12 @@ public class InitiatingCallManager extends CallManager {
     } catch( Exception e ) {
       Log.e( "InitiatingCallManager", "Died with exception!");
       Log.w( "InitiatingCallManager", e );
-      callStateListener.notifyClientFailure();
+      callStateListener.notifyClientFailure("");
     }
   }
 
+    @Override
+    public void notifyConnectedSending() {
+        callStateListener.notifyConnectedSending();
+    }
 }

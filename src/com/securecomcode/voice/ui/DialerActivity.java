@@ -44,6 +44,8 @@ import com.actionbarsherlock.view.MenuItem;
 import com.securecomcode.voice.monitor.MonitorConfigUpdateReceiver;
 import com.securecomcode.voice.util.PeriodicActionUtils;
 
+import static com.securecomcode.voice.util.Util.showAlertOnNoData;
+
 /**
  * The base dialer activity.  A tab container for the contacts, call log, and favorites tab.
  *
@@ -181,6 +183,9 @@ public class DialerActivity extends SherlockFragmentActivity {
   }
 
   private void launchResetPasswordActivity() {
+      if(!showAlertOnNoData(this)){
+          return;
+      }
     startActivity(new Intent(this, CreateAccountActivity.class));
     finish();
   }

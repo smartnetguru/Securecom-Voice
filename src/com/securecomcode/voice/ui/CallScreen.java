@@ -20,12 +20,15 @@ package com.securecomcode.voice.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.util.AttributeSet;
+
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 
 import com.securecomcode.voice.R;
 import com.securecomcode.voice.contacts.PersonInfo;
 import com.securecomcode.voice.crypto.zrtp.SASInfo;
+
+
 
 /**
  * A UI widget that encapsulates the entire in-call screen
@@ -70,7 +73,12 @@ public class CallScreen extends FrameLayout {
   }
 
   public void reset() {
-    callCard.reset();
+      try {
+          Thread.sleep(3000);
+      } catch (InterruptedException e) {
+          e.printStackTrace();
+      }
+      callCard.reset();
     callControls.reset();
   }
 

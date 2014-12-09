@@ -20,11 +20,15 @@ package com.securecomcode.voice.util;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.util.Log;
 
 import com.securecomcode.voice.ApplicationContext;
+import com.securecomcode.voice.R;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -138,6 +142,44 @@ public class Util {
 
       return result;
   }
+
+  public static boolean showAlertOnNoData(Context context){
+      ConnectivityManager cm =
+              (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+      NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+      boolean result = activeNetwork != null &&
+              activeNetwork.isConnectedOrConnecting();
+
+       if(!result){
+           AlertDialog.Builder ad = new AlertDialog.Builder(context);
+           ad.setTitle(context.getResources().getText(R.string.Warning_title_cellular_data_is_turned_off));
+           ad.setMessage(context.getResources().getText(R.string.Warning_turn_on_packet_data_or_use_wi_fi_to_complete_this_action));
+           ad.setCancelable(false);
+           ad.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+               public void onClick(DialogInterface dialog, int arg) {
+
+               }
+           });
+           ad.show();
+       }
+
+      return result;
+  }
+
+    public static boolean isDataConnectionAvailable(Context context){
+        ConnectivityManager cm =
+                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+
+
+
 
 }
 

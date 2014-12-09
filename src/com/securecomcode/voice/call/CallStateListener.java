@@ -34,7 +34,7 @@ public interface CallStateListener {
   public void notifyWaitingForResponder();
   public void notifyConnectingtoInitiator();
   public void notifyServerFailure();
-  public void notifyClientFailure();
+  public void notifyClientFailure(String message);
   public void notifyServerMessage(String serverMessage);
   public void notifyCallDisconnected();
   public void notifyCallRinging();
@@ -51,4 +51,5 @@ public interface CallStateListener {
   public void notifyClientError(int msgId);
   public void notifyClientError(String message);
   public void notifyCallConnecting();
+  public void notifyConnectedSending();
 }

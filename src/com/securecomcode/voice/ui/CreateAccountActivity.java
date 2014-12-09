@@ -55,6 +55,8 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
+import static com.securecomcode.voice.util.Util.showAlertOnNoData;
+
 /**
  * The create account activity.  Kicks off an account creation event, then waits
  * the server to respond with a challenge via SMS, receives the challenge, and
@@ -232,7 +234,6 @@ public class CreateAccountActivity extends SherlockActivity {
     PhoneNumberUtil numberUtil  = PhoneNumberUtil.getInstance();
     String localNumber = Util.getDeviceE164Number(this);/*((TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE))
                          .getLine1Number();*/
-
     try {
       if (!Util.isEmpty(localNumber)) {
         PhoneNumber localNumberObject = numberUtil.parse(localNumber, null);
@@ -279,6 +280,10 @@ public class CreateAccountActivity extends SherlockActivity {
     public void onClick(View v) {
       final CreateAccountActivity self = CreateAccountActivity.this;
       String e164number = "";
+
+        if(!showAlertOnNoData(self)){
+            return;
+        }
 
       String registerOption = PreferenceManager.getDefaultSharedPreferences(self).getString(Constants.REG_OPTION_SELECTED, "");
 

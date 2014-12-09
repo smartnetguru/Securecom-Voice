@@ -19,7 +19,9 @@
 package com.securecomcode.voice.ui;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
@@ -62,6 +64,8 @@ import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.securecomcode.voice.util.Util.showAlertOnNoData;
 
 /**
  * Activity that displays a listview of contacts for the RedPhone "dialer."
@@ -134,6 +138,12 @@ private void initializeSearch(android.widget.SearchView searchView) {
 
   @Override
   public void onListItemClick(ListView l, View v, int position, long id) {
+
+    if(!showAlertOnNoData(getActivity())){
+        return;
+    }
+
+
     ContactItemView contactItemView = (ContactItemView)v;
     String number                   = contactItemView.getNumber();
     Intent intent                   = new Intent(getActivity(), RedPhoneService.class);

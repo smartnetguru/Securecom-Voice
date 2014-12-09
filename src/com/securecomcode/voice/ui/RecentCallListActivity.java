@@ -45,6 +45,8 @@ import com.securecomcode.voice.R;
 import com.securecomcode.voice.RedPhone;
 import com.securecomcode.voice.RedPhoneService;
 
+import static com.securecomcode.voice.util.Util.showAlertOnNoData;
+
 /**
  * A tab for the dialer activity which displays recent call history.
  *
@@ -162,6 +164,9 @@ public class RecentCallListActivity extends SherlockListFragment
 
   @Override
   public void onListItemClick(ListView l, View v, int position, long id) {
+    if(!showAlertOnNoData(getActivity())){
+        return;
+    }
     Intent intent = new Intent(getActivity(), RedPhoneService.class);
     intent.setAction(RedPhoneService.ACTION_OUTGOING_CALL);
     intent.putExtra(Constants.REMOTE_NUMBER, ((CallItemView)v).getNumber());

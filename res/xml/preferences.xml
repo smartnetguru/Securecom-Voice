@@ -6,6 +6,10 @@
                         android:key="pref_prompt_upgrade"
                         android:title="@string/preferences__prompt_for_call_upgrade"
                         android:summary="@string/preferences__when_making_insecure_calls_prompt_for_upgrade_to_redphone_if_contact_is_redphone_enabled"/>
+    <CheckBoxPreference android:defaultValue="true"
+        android:key="pref_disable_screen_in_call"
+        android:title="@string/preferences__prompt_for_during_call_screen_disable"
+        android:summary="@string/preferences__prompt_for_during_call_screen_disable_description"/>
   </PreferenceCategory>
   <!--<PreferenceCategory android:title="@string/preferences__analytics_settings">
     <CheckBoxPreference android:defaultValue="false"

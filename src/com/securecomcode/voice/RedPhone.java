@@ -78,9 +78,11 @@ public class RedPhone extends Activity {
 
   public static final int STATE_IDLE      = 0;
   public static final int STATE_RINGING   = 2;
-  public static final int STATE_DIALING   = 3;
-  public static final int STATE_ANSWERING = 4;
-  public static final int STATE_CONNECTED = 5;
+  public static final int STATE_DIALING_CONNECTING   = 3;
+  public static final int STATE_DIALING_CONNECTED_SENDING   = 4;
+  public static final int STATE_DIALING_CONNECTED_WAITING   = 5;
+  public static final int STATE_ANSWERING = 6;
+  public static final int STATE_CONNECTED = 7;
 
   private static final int STANDARD_DELAY_FINISH    = 3000;
   public  static final int BUSY_SIGNAL_DELAY_FINISH = 5500;
@@ -103,6 +105,9 @@ public class RedPhone extends Activity {
   public static final int HANDLE_CLIENT_FAILURE          = 15;
   public static final int HANDLE_DEBUG_INFO              = 16;
   public static final int HANDLE_NO_SUCH_USER            = 17;
+  public static final int HANDLE_STATE_CONNECTED_SENDING = 18;
+  public static final int HANDLE_STATE_CONNECTED_WAITING = 19;
+
 
   private final Handler callStateHandler = new CallStateHandler();
 
@@ -232,16 +237,28 @@ public class RedPhone extends Activity {
   }
 
   private void handleOutgoingCall(String remoteNumber) {
-    state = STATE_DIALING;
+    state = STATE_DIALING_CONNECTING;
     callScreen.setActiveCall(PersonInfo.getInstance(this, remoteNumber),
-                             getString(R.string.RedPhone_dialing));
+                             getString(R.string.RedPhone_connecting));
+  }
+
+  private void handleStateConnectedSending(String remoteNumber){
+      state = STATE_DIALING_CONNECTED_SENDING;
+      callScreen.setActiveCall(PersonInfo.getInstance(this, remoteNumber),
+              getString(R.string.RedPhone_connected_sending));
+  }
+
+  private void handleStateConnectedWaiting(String remoteNumber){
+      state = STATE_DIALING_CONNECTED_WAITING;
+      callScreen.setActiveCall(PersonInfo.getInstance(this, remoteNumber),
+              getString(R.string.RedPhone_connected_waiting));
   }
 
   private void handleTerminate( int terminationType ) {
     Log.w("RedPhone", "handleTerminate called");
     Log.w("RedPhone", "Termination Stack:", new Exception() );
 
-    if( state == STATE_DIALING ) {
+    if( state == STATE_DIALING_CONNECTING ) {
       if (terminationType == LOCAL_TERMINATE) {
         callScreen.setActiveCall(redPhoneService.getRemotePersonInfo(),
                                  getString(R.string.RedPhone_cancelling_call));
@@ -297,6 +314,7 @@ public class RedPhone extends Activity {
 
   private void handleRecipientUnavailable() {
     state = STATE_IDLE;
+
     callScreen.setActiveCall(redPhoneService.getRemotePersonInfo(),
                              getString(R.string.RedPhone_recipient_unavailable));
     delayedFinish();
@@ -318,7 +336,7 @@ public class RedPhone extends Activity {
     state = STATE_IDLE;
     callScreen.setActiveCall(redPhoneService.getRemotePersonInfo(),
                              getString(R.string.RedPhone_client_failed));
-    if( msg != null && !isFinishing() ) {
+    if( msg != null && !msg.equalsIgnoreCase("") && !isFinishing() ) {
       AlertDialog.Builder ad = new AlertDialog.Builder(this);
       ad.setTitle("Fatal Error");
       ad.setMessage(msg);
@@ -388,15 +406,7 @@ public class RedPhone extends Activity {
     callStateHandler.postDelayed(new Runnable() {
 
     public void run() {
-      if (Release.DELIVER_DIAGNOSTIC_DATA &&
-          ApplicationPreferencesActivity.getAskUserToSendDiagnosticData(RedPhone.this)) {
-        if( !deliveringTimingData) {
-          deliveringTimingData = true;
-          QualityReporting.sendDiagnosticData(RedPhone.this);
-        }
-      } else {
         RedPhone.this.finish();
-      }
     }}, delayMillis);
   }
 
@@ -421,7 +431,10 @@ public class RedPhone extends Activity {
       case HANDLE_CALL_BUSY:               handleCallBusy();                                        break;
       case HANDLE_LOGIN_FAILED:            handleLoginFailed();                                     break;
       case HANDLE_CLIENT_FAILURE:   	   handleClientFailure((String)message.obj);                break;
-      case HANDLE_DEBUG_INFO:				       handleDebugInfo((String)message.obj);					          break;
+      case HANDLE_DEBUG_INFO:			   handleDebugInfo((String)message.obj);					break;
+      case HANDLE_STATE_CONNECTED_SENDING: handleStateConnectedSending((String)message.obj);		break;
+      case HANDLE_STATE_CONNECTED_WAITING: handleStateConnectedWaiting((String)message.obj);	    break;
+
       }
     }
   }
@@ -506,7 +519,7 @@ public class RedPhone extends Activity {
       switch (redPhoneService.getState()) {
       case STATE_IDLE:      callScreen.reset();                                       break;
       case STATE_RINGING:   handleIncomingCall(personInfo.getNumber());               break;
-      case STATE_DIALING:   handleOutgoingCall(personInfo.getNumber());               break;
+      case STATE_DIALING_CONNECTING:   handleOutgoingCall(personInfo.getNumber());    break;
       case STATE_ANSWERING: handleAnswerCall();                                       break;
       case STATE_CONNECTED: handleCallConnected(redPhoneService.getCurrentCallSAS()); break;
       }
