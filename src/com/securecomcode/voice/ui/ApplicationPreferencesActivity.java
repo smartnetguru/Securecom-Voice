@@ -159,7 +159,7 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
   }
 
   public static boolean getDisableDisplayPreference(Context context){
-    return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(DISABLE_SCREEN_IN_CALL, false);
+    return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(DISABLE_SCREEN_IN_CALL, true);
   }
 
   public static void setSignalingMethod(Context context, String value) {
