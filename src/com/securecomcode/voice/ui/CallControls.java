@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,6 +114,10 @@ public class CallControls extends RelativeLayout {
   }
 
   public void setActiveCall(SASInfo sas) {
+    if(sas == null || sasTextView == null){
+        return;
+    }
+
     setActiveCall();
     sasTextView.setText(sas.getSasText());
     sasTextView.setVisibility(View.VISIBLE);
