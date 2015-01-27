@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +40,7 @@ public class OutgoingRinger implements MediaPlayer.OnCompletionListener,
   private int currentSoundID;
   private boolean loopEnabled;
   private Context context;
+  private boolean isReconnceting = false;
 
   public OutgoingRinger(Context context) {
     this.context = context;
@@ -60,6 +62,11 @@ public class OutgoingRinger implements MediaPlayer.OnCompletionListener,
     start(R.raw.outring);
   }
 
+  public void playReconnecting(){
+      isReconnceting = true;
+      start(R.raw.sonarping);
+  }
+
   public void playComplete() {
     stop(R.raw.completed);
   }
@@ -78,7 +85,7 @@ public class OutgoingRinger implements MediaPlayer.OnCompletionListener,
   }
 
   private void start( int soundID ) {
-    if( soundID == currentSoundID ) return;
+    if(!isReconnceting && soundID == currentSoundID ) return;
     setSound( soundID );
     start();
   }
@@ -121,6 +128,7 @@ public class OutgoingRinger implements MediaPlayer.OnCompletionListener,
   }
 
   public void stop() {
+    isReconnceting = false;
     if( mediaPlayer == null ) return;
     try {
       mediaPlayer.stop();

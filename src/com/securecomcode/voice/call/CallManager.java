@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,6 +118,7 @@ public abstract class CallManager extends Thread {
         setSecureSocketKeys(zrtpSocket.getMasterSecret());
         sasInfo = zrtpSocket.getSasInfo();
         callStateListener.notifyCallConnected(sasInfo);
+        signalManager.shutdownQueue();
       }
 
       if (!terminated) {
@@ -140,6 +142,9 @@ public abstract class CallManager extends Thread {
     }
   }
 
+  public void resetSignalManager(){
+      signalManager = null;
+  }
   public void terminate() {
     this.terminated = true;
     lifecycleMonitor.emitEvent("terminate");
@@ -148,11 +153,13 @@ public abstract class CallManager extends Thread {
       monitor.startUpload(context, String.valueOf(sessionDescriptor.sessionId));
     }
 
-    if (callAudioManager != null)
-      callAudioManager.terminate();
+    if (callAudioManager != null) {
+        callAudioManager.terminate();
+    }
 
-    if (signalManager != null)
-      signalManager.terminate();
+    if (signalManager != null) {
+        signalManager.terminate();
+    }
 
     if (zrtpSocket != null)
       zrtpSocket.close();
@@ -173,7 +180,7 @@ public abstract class CallManager extends Thread {
 
   protected void processSignals() {
     Log.w("CallManager", "Starting signal processing loop...");
-    this.signalManager = new SignalManager(callStateListener, signalingSocket, sessionDescriptor);
+    this.signalManager = new SignalManager(context, callStateListener, signalingSocket, sessionDescriptor);
   }
 
   protected abstract void setSecureSocketKeys(MasterSecret masterSecret);

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +19,10 @@
 package com.securecomcode.voice.call;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.securecomcode.voice.Constants;
 import com.securecomcode.voice.Release;
 import com.securecomcode.voice.crypto.SecureRtpSocket;
 import com.securecomcode.voice.crypto.zrtp.MasterSecret;
@@ -53,6 +57,7 @@ public class InitiatingCallManager extends CallManager implements CallSignalStat
   private final String password;
   private final byte[] zid;
   private boolean loopbackMode;
+  private Context context;
 
   public InitiatingCallManager(Context context, CallStateListener callStateListener,
                                String localNumber, String password,
@@ -63,12 +68,11 @@ public class InitiatingCallManager extends CallManager implements CallSignalStat
     this.password       = password;
     this.zid            = zid;
     this.loopbackMode   = ApplicationPreferencesActivity.getLoopbackEnabled(context);
+    this.context = context;
   }
 
   @Override
   public void run() {
-
-   
 
     if( loopbackMode ) {
       runLoopback();
@@ -88,20 +92,27 @@ public class InitiatingCallManager extends CallManager implements CallSignalStat
 
       sessionDescriptor = signalingSocket.initiateConnection(remoteNumber);
 
+      PreferenceManager.getDefaultSharedPreferences(context).edit().putLong(Constants.CURRENT_CALL_SESSION_ID, sessionDescriptor.sessionId).commit();
+
       int localPort = new NetworkConnector(sessionDescriptor.sessionId,
-                                           sessionDescriptor.getFullServerName(),
+                                           sessionDescriptor.serverIP,
                                            sessionDescriptor.relayPort).makeConnection();
 
       InetSocketAddress remoteAddress = new InetSocketAddress(sessionDescriptor.getFullServerName(),
                                                               sessionDescriptor.relayPort);
 
-      secureSocket  = new SecureRtpSocket(new RtpSocket(localPort, remoteAddress));
+      secureSocket  = new SecureRtpSocket(new RtpSocket(context, localPort, remoteAddress, sessionDescriptor));
 
       zrtpSocket    = new ZRTPInitiatorSocket(context, secureSocket, zid, remoteNumber);
 
       processSignals();
 
-      callStateListener.notifyWaitingForResponder();
+
+      if(ApplicationPreferencesActivity.isCallScreenEndButtonPressed(context)){
+          signalingSocket.setHangup(sessionDescriptor.sessionId);
+      }else {
+          callStateListener.notifyWaitingForResponder();
+      }
 
       super.run();
     } catch (NoSuchUserException nsue) {

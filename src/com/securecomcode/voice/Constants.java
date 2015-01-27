@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
- * Copyright (C) 2014 Securecom
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,5 +39,6 @@ public interface Constants {
   public static final String MUTE_VALUE                  = "MuteValue";
   public static final String REG_OPTION_SELECTED         = "reg_option_value";
   public static final String COUNTRY_CODE_SELECTED       = "pref_country_selected";
+  public static final String CURRENT_CALL_SESSION_ID     = "current_call_session_id";
 
 }

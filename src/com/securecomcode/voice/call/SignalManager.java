@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
- * Copyright (C) 2014 Securecom
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,11 @@
  */
 package com.securecomcode.voice.call;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
+import com.securecomcode.voice.RedPhoneService;
 import com.securecomcode.voice.signaling.SessionDescriptor;
 import com.securecomcode.voice.signaling.SignalingException;
 import com.securecomcode.voice.signaling.SignalingSocket;
@@ -29,46 +32,35 @@ import java.util.concurrent.Executors;
 
 public class SignalManager {
 
-  private final ExecutorService queue = Executors.newSingleThreadExecutor();
+  private ExecutorService queue = Executors.newSingleThreadExecutor();
 
   private final SignalingSocket signalingSocket;
   private final SessionDescriptor sessionDescriptor;
   private final CallStateListener callStateListener;
+  private final Context context;
 
   private volatile boolean interrupted = false;
 
-  public SignalManager(CallStateListener callStateListener,
+  public SignalManager(Context context, CallStateListener callStateListener,
                        SignalingSocket signalingSocket,
                        SessionDescriptor sessionDescriptor)
   {
     this.callStateListener = callStateListener;
     this.signalingSocket   = signalingSocket;
     this.sessionDescriptor = sessionDescriptor;
-
+    this.context           = context;
     this.queue.execute(new SignalListenerTask());
   }
 
-//  public void sendBusySignal(String remoteNumber, final long sessionId) {
-//    Log.w("SignalManager", "Queuing busy signal...");
-//    queue.execute(new Runnable() {
-//      public void run() {
-//        try {
-//          Log.w("SignalManager", "Sending busy signal...");
-//          signalingSocket.setBusy(sessionId);
-//        } catch (SignalingException se) {
-//          Log.w("SignalManager", se);
-//        }
-//      }
-//    });
-//
-//    interrupted = true;
-//  }
-
   public void terminate() {
     Log.w("SignalManager", "Queuing hangup signal...");
+    if(this.queue.isShutdown()){
+        this.queue =  Executors.newSingleThreadExecutor();
+        this.queue.execute(new SignalListenerTask());
+    }
     queue.execute(new Runnable() {
       public void run() {
-          Log.w("SignalManager", "Sending hangup signal...");
+        Log.w("SignalManager", "Sending hangup signal...");
         signalingSocket.setHangup(sessionDescriptor.sessionId);
         signalingSocket.close();
         queue.shutdownNow();
@@ -78,10 +70,18 @@ public class SignalManager {
     interrupted = true;
   }
 
+  public void shutdownQueue(){
+      queue.execute(new Runnable() {
+          public void run() {
+              signalingSocket.close();
+              queue.shutdownNow();
+          }
+      });
+      interrupted = true;
+  }
+
   private class SignalListenerTask implements Runnable {
     public void run() {
-      Log.w("SignalManager", "Running Signal Listener...");
-
       try {
         while (!interrupted) {
           if (signalingSocket.waitForSignal()){
@@ -89,13 +89,17 @@ public class SignalManager {
           }
         }
 
-        Log.w("SignalManager", "Signal Listener Running, interrupted: " + interrupted);
-
         if (!interrupted) {
           ServerSignal signal = signalingSocket.readSignal();
           long sessionId      = sessionDescriptor.sessionId;
 
-          if      (signal.isHangup(sessionId))  callStateListener.notifyCallDisconnected();
+          if (signal.isHangup(sessionId)) {
+              Intent intent = new Intent(context, RedPhoneService.class);
+              intent.setAction(RedPhoneService.ACTION_CALL_DISCONNECTED);
+              intent.putExtra("session_id", sessionId);
+              intent.putExtra("ExitTimeOut", "");
+              context.startService(intent);
+          }
           else if (signal.isRinging(sessionId)) {
               callStateListener.notifyCallRinging();
               signalingSocket.sendOkResponse();
@@ -106,7 +110,6 @@ public class SignalManager {
           }
           else if (signal.isKeepAlive())  {
               signalingSocket.sendOkResponse();
-              Log.w("CallManager", "Received keep-alive...");
           }
 
         }

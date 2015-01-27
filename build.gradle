@@ -17,6 +17,9 @@ repositories {
     maven {
         url "https://raw.github.com/whispersystems/maven/master/gson/releases/"
     }
+    flatDir {
+        dirs 'libs'
+    }
 }
 
 dependencies {

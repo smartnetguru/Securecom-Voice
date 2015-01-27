@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
- * Copyright (C) 2014 Securecom 
+ * Copyright (C) 2015 Securecom 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,89 +43,96 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * A class representing an encrypted "signal," typically a notification of
  * an incoming call that's delivered over either SMS or C2DM.
- *
+ * <p/>
  * Message format is $IV:ciphertext:MAC
- *
+ * <p/>
  * Version   : 1 Byte
  * IV        : Random.
  * Ciphertext: AES-128 encrypted with CBC mode.
  * MAC       : Hmac-SHA1, truncated to 80 bits over everything preceding (encrypted then auth).
-
- * @author Moxie Marlinspike
  *
+ * @author Moxie Marlinspike
  */
 
 public class EncryptedSignalMessage {
 
-  private static final int VERSION_OFFSET    = 0;
-  private static final int IV_OFFSET         = VERSION_OFFSET + 1;
-  private static final int CIPHERTEXT_OFFSET = IV_OFFSET + 16;
-  private static final int MAC_LENGTH        = 10;
+    private static final int VERSION_OFFSET = 0;
+    private static final int IV_OFFSET = VERSION_OFFSET + 1;
+    private static final int CIPHERTEXT_OFFSET = IV_OFFSET + 16;
+    private static final int MAC_LENGTH = 10;
 
-  private final String message;
-  private final Context context;
-  private final char[] hexArray = "0123456789ABCDEF".toCharArray();
+    private final String message;
+    private final byte[] msg;
+    private final Context context;
+    private final char[] hexArray = "0123456789ABCDEF".toCharArray();
 
-  public EncryptedSignalMessage(Context context, String message) {
-    this.message = message;
-    this.context = context.getApplicationContext();
-  }
+    public EncryptedSignalMessage(Context context, String message) {
+        this.message = message;
+        this.msg = message.getBytes();
+        this.context = context.getApplicationContext();
+    }
 
-  private byte[] getCombinedKey() throws InvalidEncryptedSignalException, IOException {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    String key                    = preferences.getString(Constants.KEY_PREFERENCE, null);
-    if (key == null)
-      throw new InvalidEncryptedSignalException("No combined key available!");
+    public EncryptedSignalMessage(Context context, byte[] message) {
+        this.msg = message;
+        this.message = new String(msg);
+        this.context = context.getApplicationContext();
+    }
 
-    byte[] keyBytes = Base64.decode(key);
+    private byte[] getCombinedKey() throws InvalidEncryptedSignalException, IOException {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String key = preferences.getString(Constants.KEY_PREFERENCE, null);
+        if (key == null)
+            throw new InvalidEncryptedSignalException("No combined key available!");
 
-    if (keyBytes.length != 40)
-      throw new InvalidEncryptedSignalException("Local cipher+mac key != 40 bytes?");
+        byte[] keyBytes = Base64.decode(key);
 
-    return keyBytes;
-  }
+        if (keyBytes.length != 40)
+            throw new InvalidEncryptedSignalException("Local cipher+mac key != 40 bytes?");
 
-  private byte[] getCipherKey() throws InvalidEncryptedSignalException, IOException {
-    byte[] keyBytes       = getCombinedKey();
-    byte[] cipherKeyBytes = new byte[16];
+        return keyBytes;
+    }
 
-    System.arraycopy(keyBytes, 0, cipherKeyBytes, 0, cipherKeyBytes.length);
-    return cipherKeyBytes;
-  }
+    private byte[] getCipherKey() throws InvalidEncryptedSignalException, IOException {
+        byte[] keyBytes = getCombinedKey();
+        byte[] cipherKeyBytes = new byte[16];
 
-  private byte[] getMacKey() throws InvalidEncryptedSignalException, IOException {
-    byte[] keyBytes    = getCombinedKey();
-    byte[] macKeyBytes = new byte[20];
+        System.arraycopy(keyBytes, 0, cipherKeyBytes, 0, cipherKeyBytes.length);
+        return cipherKeyBytes;
+    }
 
-    System.arraycopy(keyBytes, 16, macKeyBytes, 0, macKeyBytes.length);
-    return macKeyBytes;
-  }
+    private byte[] getMacKey() throws InvalidEncryptedSignalException, IOException {
+        byte[] keyBytes = getCombinedKey();
+        byte[] macKeyBytes = new byte[20];
 
-  private boolean verifyMac(byte[] messageBytes)
-      throws InvalidEncryptedSignalException, IOException,
-             NoSuchAlgorithmException, InvalidKeyException
-  {
-    byte[] macKey     = getMacKey();
-    SecretKeySpec key = new SecretKeySpec(macKey, "HmacSHA1");
-    Mac mac           = Mac.getInstance("HmacSHA1");
+        System.arraycopy(keyBytes, 16, macKeyBytes, 0, macKeyBytes.length);
+        return macKeyBytes;
+    }
 
-    mac.init(key);
-    mac.update(messageBytes, 0, messageBytes.length-MAC_LENGTH);
+    private boolean verifyMac(byte[] messageBytes)
+            throws InvalidEncryptedSignalException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException {
+        byte[] macKey = getMacKey();
 
-    byte[] ourDigestComplete = mac.doFinal();
-    byte[] ourDigest         = new byte[10];
-    byte[] theirDigest       = new byte[10];
+        SecretKeySpec key = new SecretKeySpec(macKey, "HmacSHA1");
+        Mac mac = Mac.getInstance("HmacSHA1");
 
-    System.arraycopy(ourDigestComplete,  10, ourDigest, 0, ourDigest.length);
-    System.arraycopy(messageBytes, messageBytes.length-MAC_LENGTH,
-                     theirDigest, 0, theirDigest.length);
+        mac.init(key);
+        mac.update(messageBytes, 0, messageBytes.length - MAC_LENGTH);
 
-    return Arrays.equals(ourDigest, theirDigest);
-  }
+        byte[] ourDigestComplete = mac.doFinal();
+        byte[] ourDigest = new byte[10];
+        byte[] theirDigest = new byte[10];
+
+        System.arraycopy(ourDigestComplete, 10, ourDigest, 0, ourDigest.length);
+        System.arraycopy(messageBytes, messageBytes.length - MAC_LENGTH,
+                theirDigest, 0, theirDigest.length);
+
+        return Arrays.equals(ourDigest, theirDigest);
+    }
 
     public String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
+        for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;
             hexChars[j * 2] = hexArray[v >>> 4];
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
@@ -133,60 +140,91 @@ public class EncryptedSignalMessage {
         return new String(hexChars);
     }
 
-  private boolean isValidVersion(byte[] messageBytes) {
-    return messageBytes[VERSION_OFFSET] == 0x00;
-  }
-
-  private Cipher getCipher(byte[] messageBytes)
-      throws InvalidEncryptedSignalException, InvalidKeyException,
-             InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-             NoSuchPaddingException, IOException
-  {
-    SecretKeySpec cipherKey = new SecretKeySpec(getCipherKey(), "AES");
-    byte[] ivBytes          = new byte[16];
-
-    if (messageBytes.length < ivBytes.length)
-      throw new InvalidEncryptedSignalException("Message shorter than IV length.");
-
-    System.arraycopy(messageBytes, IV_OFFSET, ivBytes, 0, ivBytes.length);
-
-    Cipher cipher      = Cipher.getInstance("AES/CBC/PKCS5Padding");
-    IvParameterSpec iv = new IvParameterSpec(ivBytes);
-    cipher.init(Cipher.DECRYPT_MODE, cipherKey, iv);
-
-    return cipher;
-  }
-
-  public byte[] getPlaintext() throws InvalidEncryptedSignalException {
-    try {
-
-      byte[] messageBytes = Base64.decode(this.message);
-
-      if (!isValidVersion(messageBytes))
-        throw new InvalidEncryptedSignalException("Unknown version: " +
-                                                  (byte)messageBytes[VERSION_OFFSET]);
-
-      if (!verifyMac(messageBytes))
-        throw new InvalidEncryptedSignalException("Bad MAC");
-
-      Cipher cipher = getCipher(messageBytes);
-      return cipher.doFinal(messageBytes, CIPHERTEXT_OFFSET,
-                            messageBytes.length - CIPHERTEXT_OFFSET - MAC_LENGTH);
-    } catch (IOException e) {
-      throw new InvalidEncryptedSignalException(e);
-    } catch (NoSuchAlgorithmException e) {
-      throw new AssertionError(e);
-    } catch (InvalidKeyException e) {
-      throw new InvalidEncryptedSignalException(e);
-    } catch (InvalidAlgorithmParameterException e) {
-      throw new AssertionError(e);
-    } catch (NoSuchPaddingException e) {
-      throw new AssertionError(e);
-    } catch (IllegalBlockSizeException e) {
-      throw new InvalidEncryptedSignalException(e);
-    } catch (BadPaddingException e) {
-      throw new InvalidEncryptedSignalException(e);
+    private boolean isValidVersion(byte[] messageBytes) {
+        return messageBytes[VERSION_OFFSET] == 0x00;
     }
-  }
+
+    private Cipher getCipher(byte[] messageBytes)
+            throws InvalidEncryptedSignalException, InvalidKeyException,
+            InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+            NoSuchPaddingException, IOException {
+        SecretKeySpec cipherKey = new SecretKeySpec(getCipherKey(), "AES");
+        byte[] ivBytes = new byte[16];
+
+        if (messageBytes.length < ivBytes.length)
+            throw new InvalidEncryptedSignalException("Message shorter than IV length.");
+
+        System.arraycopy(messageBytes, IV_OFFSET, ivBytes, 0, ivBytes.length);
+
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        IvParameterSpec iv = new IvParameterSpec(ivBytes);
+        cipher.init(Cipher.DECRYPT_MODE, cipherKey, iv);
+
+        return cipher;
+    }
+
+    public byte[] getPlaintextNoBase64() throws InvalidEncryptedSignalException {
+        try {
+
+            byte[] messageBytes = msg;
+
+            if (!isValidVersion(messageBytes))
+                throw new InvalidEncryptedSignalException("Unknown version: " +
+                        (byte) messageBytes[VERSION_OFFSET]);
+
+            if (!verifyMac(messageBytes))
+			    Log.e("EncryptedSignalMessage","Received Signal with bad MAC");
+
+            Cipher cipher = getCipher(messageBytes);
+            return cipher.doFinal(messageBytes, CIPHERTEXT_OFFSET,
+                    messageBytes.length - CIPHERTEXT_OFFSET - MAC_LENGTH);
+        } catch (IOException e) {
+            throw new InvalidEncryptedSignalException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError(e);
+        } catch (InvalidKeyException e) {
+            throw new InvalidEncryptedSignalException(e);
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new AssertionError(e);
+        } catch (NoSuchPaddingException e) {
+            throw new AssertionError(e);
+        } catch (IllegalBlockSizeException e) {
+            throw new InvalidEncryptedSignalException(e);
+        } catch (BadPaddingException e) {
+            throw new InvalidEncryptedSignalException(e);
+        }
+    }
+
+    public byte[] getPlaintext() throws InvalidEncryptedSignalException {
+        try {
+
+            byte[] messageBytes = Base64.decode(this.message);
+
+            if (!isValidVersion(messageBytes))
+                throw new InvalidEncryptedSignalException("Unknown version: " +
+                        (byte) messageBytes[VERSION_OFFSET]);
+
+            if (!verifyMac(messageBytes))
+                throw new InvalidEncryptedSignalException("Bad MAC");
+
+            Cipher cipher = getCipher(messageBytes);
+            return cipher.doFinal(messageBytes, CIPHERTEXT_OFFSET,
+                    messageBytes.length - CIPHERTEXT_OFFSET - MAC_LENGTH);
+        } catch (IOException e) {
+            throw new InvalidEncryptedSignalException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError(e);
+        } catch (InvalidKeyException e) {
+            throw new InvalidEncryptedSignalException(e);
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new AssertionError(e);
+        } catch (NoSuchPaddingException e) {
+            throw new AssertionError(e);
+        } catch (IllegalBlockSizeException e) {
+            throw new InvalidEncryptedSignalException(e);
+        } catch (BadPaddingException e) {
+            throw new InvalidEncryptedSignalException(e);
+        }
+    }
 
 }

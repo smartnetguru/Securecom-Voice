@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +25,12 @@ package com.securecomcode.voice;
  *
  */
 public interface Release {
-  public static final boolean SSL                     = false;
+  public static final boolean SSL                     = true;
   public static final boolean DEBUG                   = false;
   public static final boolean DELIVER_DIAGNOSTIC_DATA = false;
   public static final String  SERVER_ROOT             = ".securecomcode.com";
   public static final String MASTER_SERVER_HOST       = "master.securecomcode.com";
   public static final String RELAY_SERVER_HOST        = "master.securecomcode.com";
   public static final String DATA_COLLECTION_SERVER_HOST = "master.securecomcode.com";
-  public static final int     SERVER_PORT             = 443;
+  public static final int    SERVER_PORT             = 443;
 }

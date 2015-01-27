@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +48,7 @@ import com.securecomcode.voice.contacts.PersonInfo;
 import com.securecomcode.voice.crypto.zrtp.SASInfo;
 import com.securecomcode.voice.gcm.GCMRegistrarHelper;
 import com.securecomcode.voice.monitor.CallDataImpl;
+import com.securecomcode.voice.network.RtpSocket;
 import com.securecomcode.voice.pstn.CallStateView;
 import com.securecomcode.voice.pstn.IncomingPstnCallListener;
 import com.securecomcode.voice.signaling.OtpCounterProvider;
@@ -54,6 +56,7 @@ import com.securecomcode.voice.signaling.SessionDescriptor;
 import com.securecomcode.voice.signaling.SignalingException;
 import com.securecomcode.voice.signaling.SignalingSocket;
 import com.securecomcode.voice.ui.ApplicationPreferencesActivity;
+import com.securecomcode.voice.ui.CallCard;
 import com.securecomcode.voice.ui.CallQualityDialog;
 import com.securecomcode.voice.ui.NotificationBarManager;
 import com.securecomcode.voice.util.Base64;
@@ -85,6 +88,9 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
   public static final String ACTION_HANGUP_CALL   = "com.securecomcode.voice.RedPhoneService.HANGUP";
   public static final String ACTION_SET_MUTE      = "com.securecomcode.voice.RedPhoneService.SET_MUTE";
   public static final String ACTION_CONFIRM_SAS   = "com.securecomcode.voice.RedPhoneService.CONFIRM_SAS";
+  public static final String ACTION_CALL_DISCONNECTED   = "com.securecomcode.voice.RedPhoneService.CALL_DISCONNECTED";
+  public static final String ACTION_CALL_RECONNECTING_TONE_START   = "com.securecomcode.voice.RedPhoneService.CALL_RECONNECTING_TONE_START";
+  public static final String ACTION_CALL_RECONNECTING_TONE_STOP   = "com.securecomcode.voice.RedPhoneService.CALL_RECONNECTING_TONE_STOP";
 
   private static final String TAG = RedPhoneService.class.getName();
 
@@ -105,7 +111,6 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
   private UncaughtExceptionHandlerManager uncaughtExceptionHandlerManager;
 
   private Handler handler;
-  private CallLogger.CallRecord currentCallRecord;
   private IncomingPstnCallListener pstnCallListener;
 
   @Override
@@ -154,8 +159,11 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     else if (intent.getAction().equals(ACTION_ANSWER_CALL))               handleAnswerCall(intent);
     else if (intent.getAction().equals(ACTION_DENY_CALL))                 handleDenyCall(intent);
     else if (intent.getAction().equals(ACTION_HANGUP_CALL))               handleHangupCall(intent);
+    else if (intent.getAction().equals(ACTION_CALL_DISCONNECTED))         handleCallDisconnected(intent);
     else if (intent.getAction().equals(ACTION_SET_MUTE))                  handleSetMute(intent);
     else if (intent.getAction().equals(ACTION_CONFIRM_SAS))               handleConfirmSas(intent);
+    else if (intent.getAction().equals(ACTION_CALL_RECONNECTING_TONE_START))         handleReconnectingToneStart(intent);
+    else if (intent.getAction().equals(ACTION_CALL_RECONNECTING_TONE_STOP))         handleReconnectingToneStop(intent);
   }
 
   ///// Initializers
@@ -199,6 +207,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     remoteNumber              = extractRemoteNumber(intent);
     state                     = RedPhone.STATE_RINGING;
 
+    ApplicationPreferencesActivity.setCallScreenEndButtonPressed(getApplicationContext(), false);
     lockManager.updatePhoneState(LockManager.PhoneState.PROCESSING);
     this.currentCallManager = new ResponderCallManager(this, this, remoteNumber, localNumber,
                                                        password, session, zid);
@@ -207,6 +216,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
 
   private void handleOutgoingCall(Intent intent) {
 
+    ApplicationPreferencesActivity.setCallScreenEndButtonPressed(getApplicationContext(), false);
     if(!isDataConnectionAvailable(getApplicationContext())){
         notifyClientFailure(getResources().getString(R.string.Warning_turn_on_packet_data_or_use_wi_fi_to_complete_this_action));
         return;
@@ -227,7 +237,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
 
     NotificationBarManager.setCallInProgress(this);
 
-    currentCallRecord = CallLogger.logOutgoingCall(this, remoteNumber);
+    CallLogger.logOutgoingCall(this, remoteNumber);
   }
 
   private void handleBusyCall(Intent intent) {
@@ -261,7 +271,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
   private void handleAnswerCall(Intent intent) {
     state = RedPhone.STATE_ANSWERING;
     incomingRinger.stop();
-    currentCallRecord = CallLogger.logIncomingCall(this, remoteNumber);
+    CallLogger.logIncomingCall(this, remoteNumber);
     if (currentCallManager != null) {
       ((ResponderCallManager)this.currentCallManager).answer(true);
     }
@@ -278,7 +288,22 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
   }
 
   private void handleHangupCall(Intent intent) {
+    ApplicationPreferencesActivity.setCallScreenEndButtonPressed(getApplicationContext(), true);
     this.terminate();
+  }
+
+  private void handleCallDisconnected(Intent intent){
+      try {
+          if (currentCallManager != null && currentCallManager.getSessionDescriptor().sessionId == intent.getExtras().getLong("session_id")) {
+              currentCallManager.resetSignalManager();
+              notifyCallDisconnected();
+          } else if (intent != null && intent.getExtras().getString("ExitTimeOut").equalsIgnoreCase("ExitTimeOut")) {
+              notifyCallDisconnected();
+          }
+      }catch(Exception e){
+          //Do Nothing
+      }
+
   }
 
   private void handleSetMute(Intent intent) {
@@ -292,6 +317,13 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
       currentCallManager.setSasVerified();
   }
 
+  private void handleReconnectingToneStart(Intent intent){
+      notifyCallReconnectingStart();
+  }
+
+  private void handleReconnectingToneStop(Intent intent){
+      notifyCallReconnectingStop();
+  }
   /// Helper Methods
 
   private boolean isBusy() {
@@ -372,20 +404,15 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
   }
 
   private synchronized void terminate() {
-   // Log.w("RedPhoneService", "termination stack", new Exception() );
+    ApplicationPreferencesActivity.setInCallStatusPreference(getApplicationContext(), false);
+    RtpSocket.isOPSThreadStarted = false;
     lockManager.updatePhoneState(LockManager.PhoneState.PROCESSING);
     NotificationBarManager.setCallEnded(this);
 
     incomingRinger.stop();
     outgoingRinger.stop();
 
-    if (currentCallRecord != null) {
-      currentCallRecord.finishCall();
-      currentCallRecord = null;
-    }
-
     if (currentCallManager != null) {
-      //maybeStartQualityMetricsActivity();
       currentCallManager.terminate();
       currentCallManager = null;
     }
@@ -393,11 +420,11 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     shutdownAudio();
 
     state = RedPhone.STATE_IDLE;
-    lockManager.updatePhoneState(LockManager.PhoneState.INTERACTIVE);
+    lockManager.updatePhoneState(LockManager.PhoneState.IDLE);
 
     // XXX moxie@thoughtcrime.org -- Do we still need to stop the Service?
 //    Log.d("RedPhoneService", "STOP SELF" );
-//    this.stopSelf();
+    this.stopSelf();
   }
 
   public void maybeStartQualityMetricsActivity() {
@@ -464,6 +491,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     Log.w("RedPhoneService", "Got busy signal from responder!");
     sendMessage(RedPhone.HANDLE_CALL_BUSY, null);
     outgoingRinger.playBusy();
+    currentCallManager.resetSignalManager();
     serviceHandler.postDelayed(new Runnable() {
       @Override
       public void run() {
@@ -588,6 +616,18 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     outgoingRinger.playSonar();
   }
 
+    public void notifyCallReconnectingStart() {
+        if(outgoingRinger != null) {
+            outgoingRinger.playReconnecting();
+        }
+    }
+
+    public void notifyCallReconnectingStop() {
+        if(outgoingRinger != null) {
+            outgoingRinger.stop();
+        }
+    }
+
     @Override
     public void notifyConnectedSending() {
         sendMessage(RedPhone.HANDLE_STATE_CONNECTED_SENDING, remoteNumber);
@@ -650,7 +690,7 @@ public class RedPhoneService extends Service implements CallStateListener, CallS
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
       Log.d(TAG, "Uncaught exception - releasing proximity lock", throwable);
-      lockManager.updatePhoneState(LockManager.PhoneState.INTERACTIVE);
+      lockManager.updatePhoneState(LockManager.PhoneState.IDLE);
     }
   }
 }
