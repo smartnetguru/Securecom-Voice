@@ -1,5 +1,5 @@
 /*
-*Copyright (C) 2014 Securecom
+*Copyright (C) 2015 Securecom
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.PowerManager;
+
+import com.securecomcode.voice.util.Util;
 
 public final class ProximityListener {
     private SensorManager mSensorManager;
@@ -60,8 +62,8 @@ public final class ProximityListener {
     SensorEventListener mSensorListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
             float distance = event.values[0];
-            if(distance < 5){
-                if(!wakeLock.isHeld()) {
+            if (distance < 4) {
+                if (!wakeLock.isHeld()) {
                     wakeLock.acquire();
                 }
             }
