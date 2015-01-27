@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Securecom
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.content.ContentResolver;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
@@ -50,6 +52,7 @@ import com.securecomcode.voice.Constants;
 import com.securecomcode.voice.R;
 import com.securecomcode.voice.RedPhone;
 import com.securecomcode.voice.RedPhoneService;
+import com.securecomcode.voice.util.Util;
 
 import static com.securecomcode.voice.util.Util.showAlertOnNoData;
 
@@ -108,6 +111,8 @@ public class DialpadFragment extends SherlockFragment implements
 
 		mDigitsContainer = fragmentView.findViewById(R.id.digits_container);
 		mDigits = (EditText) fragmentView.findViewById(R.id.digits);
+        //Hide the soft
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		/* mDigits.setKeyListener(UnicodeDialerKeyListener.INSTANCE); */
 		mDigits.setOnClickListener(this);
 		mDigits.setOnKeyListener(this);
@@ -297,9 +302,16 @@ public class DialpadFragment extends SherlockFragment implements
             return;
         }
 		if (isDigitsEmpty()) { // No number entered.
-			// TODO: Handle this case
-		} else {
+            Toast.makeText(getActivity(), getString(R.string.CreateAccountActivity_you_must_specify_a_phone_number), Toast.LENGTH_SHORT).show();
+        } else {
 			final String number = mDigits.getText().toString();
+
+            if(number.contains("*") || number.contains("#")){
+                Util.showAlertDialog(getActivity(),
+                        getString(R.string.CreateAccountActivity_invalid_number),
+                        String.format(getString(R.string.CreateAccountActivity_the_number_you_specified_s_is_invalid), number));
+                return;
+            }
 
 			if (number != null) {
 				Intent intent = new Intent(getActivity(), RedPhoneService.class);
