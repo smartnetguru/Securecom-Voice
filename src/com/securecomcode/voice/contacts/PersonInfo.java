@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,23 +120,28 @@ public class PersonInfo {
 
   public static PersonInfo getInstance(Context context, String phoneNumber) {
     //TODO handle empty phone numbers and other bad query states
+    try {
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                Uri.encode(phoneNumber));
+        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
 
-    Uri uri       = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-                                         Uri.encode(phoneNumber));
-    Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        if (cursor == null || !cursor.moveToFirst()) return new PersonInfo(phoneNumber);
 
-    if (cursor == null || !cursor.moveToFirst()) return new PersonInfo(phoneNumber);
+        String name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+        int type = cursor.getInt(cursor.getColumnIndex(ContactsContract.PhoneLookup.TYPE));
+        String label = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.LABEL));
+        String displayLabel = Phone.getTypeLabel(context.getResources(), type, label).toString();
+        long personId = cursor.getLong(cursor.getColumnIndex(ContactsContract.PhoneLookup._ID));
+        String ringtone = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.CUSTOM_RINGTONE));
 
-    String name         = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
-    int type            = cursor.getInt(cursor.getColumnIndex(ContactsContract.PhoneLookup.TYPE));
-    String label        = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.LABEL));
-    String displayLabel = Phone.getTypeLabel(context.getResources(), type, label).toString();
-    long personId       = cursor.getLong(cursor.getColumnIndex(ContactsContract.PhoneLookup._ID));
-    String ringtone     = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.CUSTOM_RINGTONE));
+        cursor.close();
 
-    cursor.close();
+        return new PersonInfo(phoneNumber, name, displayLabel, personId,
+                ringtone, loadImage(context, personId), type);
+    }catch (Exception e){
 
-    return new PersonInfo(phoneNumber, name, displayLabel, personId,
-                          ringtone, loadImage(context, personId), type);
+    }
+
+    return null;
   }
 }
