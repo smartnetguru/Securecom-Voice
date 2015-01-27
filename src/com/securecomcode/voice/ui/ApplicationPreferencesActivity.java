@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +58,7 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
   public static final String DEBUG_VIEW_PREF            	  = "pref_debugview";
   public static final String SIMULATE_PACKET_DROPS      	  = "pref_simulate_packet_loss";
   public static final String MINIMIZE_LATENCY           	  = "pref_min_latency";
-  public static final String SINGLE_THREAD		        	    = "pref_singlethread";
+  public static final String SINGLE_THREAD		        	  = "pref_singlethread";
   public static final String USE_C2DM_LEGACY            	  = "pref_use_c2dm";
   public static final String SIGNALING_METHOD           	  = "pref_signaling_method";
   public static final String AUDIO_TRACK_DES_LEVEL      	  = "pref_audio_track_des_buffer_level";
@@ -67,13 +68,16 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
   public static final String ENABLE_CALL_QUALITY_DIALOG		  = "pref_enable_call_quality_dialog";
   public static final String OPPORTUNISTIC_UPGRADE_PREF 	  = "pref_prompt_upgrade";
   public static final String CALL_QUALITY_QUESTIONS_PREF 	  = "pref_call_quality_questions";
-  public static final String USER_ASKED_FOR_FEEDBACK_OPT_IN	= "pref_user_asked_to_opt_int_for_feedback";
-  public static final String BLUETOOTH_ENABLED              = "pref_bluetooth_enabled";
-  public static final String DISABLE_SCREEN_IN_CALL = "pref_disable_screen_in_call";
+  public static final String USER_ASKED_FOR_FEEDBACK_OPT_IN	  = "pref_user_asked_to_opt_int_for_feedback";
+  public static final String BLUETOOTH_ENABLED                = "pref_bluetooth_enabled";
+  public static final String DISABLE_SCREEN_IN_CALL           = "pref_disable_screen_in_call";
+  public static final String DISABLE_TRAFFIC_GRAPH_IN_CALL    = "pref_disable_traffic_in_call";
+  public static final String RECONNECTING_CALL_PREF           = "pref_reconnecting_call";
+  public static final String RECONNECTING__IS_IN_CALL_PREF    = "pref_in_call";
+  public static final String CALL_END_BUTTON_PRESSED          = "pref_is_terminate_called";
+  public static final String CALL_TIMER_COUNT                 = "pref_call_timer_count";
 
   private static final Gson gson = new Gson();
-
-  private ProgressDialog progressDialog;
 
   @Override
   protected void onCreate(Bundle icicle) {
@@ -88,9 +92,6 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
       addPreferencesFromResource(R.xml.debug);
     }
 
-    initializeListeners();
-    initializeDecorators();
-
     if(this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_PROXIMITY)){
         getPreferenceScreen().findPreference("pref_disable_screen_in_call").setDefaultValue(true);
     }else{
@@ -102,9 +103,6 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
   @Override
   protected void onDestroy() {
     super.onDestroy();
-
-    if (progressDialog != null)
-      progressDialog.dismiss();
   }
 
   @Override
@@ -118,26 +116,6 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
     return false;
   }
 
-  private void initializeListeners() {
-    final ListPreference signalingMethodPreference = (ListPreference)this.findPreference(SIGNALING_METHOD);
-    signalingMethodPreference.setOnPreferenceChangeListener(new GCMToggleListener());
-    signalingMethodPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-      @Override
-      public boolean onPreferenceClick(Preference preference) {
-        try {
-          GCMRegistrar.checkDevice(ApplicationPreferencesActivity.this);
-          signalingMethodPreference.setEntries(R.array.signaling_method_names);
-          signalingMethodPreference.setEntryValues(R.array.signaling_method_values);
-        } catch (UnsupportedOperationException uoe) {
-          signalingMethodPreference.setEntries(R.array.signaling_method_names_no_push);
-          signalingMethodPreference.setEntryValues(R.array.signaling_method_values_no_push);
-        }
-
-        return false;
-      }
-    });
-  }
-
   private void initializeLegacyPreferencesMigration() {
     if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(USE_C2DM_LEGACY, false)) {
       PreferenceManager.getDefaultSharedPreferences(this).edit()
@@ -147,12 +125,6 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
     }
   }
 
-  private void initializeDecorators() {
-    ListPreference signalingPreference = (ListPreference)this.findPreference(SIGNALING_METHOD);
-    signalingPreference.setTitle(getString(R.string.preferences__signaling_method) +
-                                 " (" + signalingPreference.getValue().toUpperCase() + ")");
-  }
-
   public static boolean getPromptUpgradePreference(Context context) {
     return PreferenceManager
            .getDefaultSharedPreferences(context).getBoolean(OPPORTUNISTIC_UPGRADE_PREF, true);
@@ -160,6 +132,10 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
 
   public static boolean getDisableDisplayPreference(Context context){
     return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(DISABLE_SCREEN_IN_CALL, true);
+  }
+
+  public static boolean getDisableTrafficGraphPreference(Context context){
+      return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(DISABLE_TRAFFIC_GRAPH_IN_CALL, true);
   }
 
   public static void setSignalingMethod(Context context, String value) {
@@ -226,62 +202,6 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
   }
 
 
-  private class GCMToggleListener implements Preference.OnPreferenceChangeListener {
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-      if (((ListPreference)preference).getValue().equals((String)newValue))
-        return false;
-
-      new AsyncTask<String, Void, String>() {
-        @Override
-        protected void onPreExecute() {
-          progressDialog = ProgressDialog.show(ApplicationPreferencesActivity.this,
-                                               getString(R.string.ApplicationPreferencesActivity_updating_signaling_method),
-                                               getString(R.string.ApplicationPreferencesActivity_changing_signaling_method_this_could_take_a_second),
-                                               true, false);
-        }
-
-        @Override
-        protected String doInBackground(String... signalingPreference) {
-          for (int i=0;i<3;i++) {
-            try {
-              SignalingSocket signalingSocket = new SignalingSocket(ApplicationPreferencesActivity.this);
-              signalingSocket.registerSignalingPreference(signalingPreference[0]);
-              return signalingPreference[0];
-            } catch (SignalingException se) {
-              Log.w("ApplicationPreferencesActivity", se);
-            }
-          }
-
-          return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-          if (progressDialog != null)
-            progressDialog.dismiss();
-
-          if (result != null) {
-            ((ListPreference)findPreference(SIGNALING_METHOD)).setValue(result);
-
-            Toast.makeText(ApplicationPreferencesActivity.this,
-                           "Successfully updated signaling preference",
-                           Toast.LENGTH_SHORT).show();
-          } else {
-            Toast.makeText(ApplicationPreferencesActivity.this,
-                           "Error communicating signaling preference to server!",
-                           Toast.LENGTH_LONG).show();
-          }
-
-          initializeDecorators();
-        }
-      }.execute((String)newValue);
-
-      return false;
-    }
-  }
-
-
   public static void setAskUserToSendDiagnosticData(Context context, boolean enabled) {
     PreferenceManager
     .getDefaultSharedPreferences(context).edit()
@@ -336,5 +256,47 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
     return PreferenceManager
       .getDefaultSharedPreferences(context).getBoolean(BLUETOOTH_ENABLED, false);
   }
+
+  public static void setDisplayReconnectingCallPreference(Context context,boolean value){
+    PreferenceManager.getDefaultSharedPreferences(context).edit()
+        .putBoolean(RECONNECTING_CALL_PREF, value)
+        .commit();
+  }
+  public static boolean getDisplayReconnecting(Context context) {
+      return PreferenceManager
+              .getDefaultSharedPreferences(context).getBoolean(RECONNECTING_CALL_PREF, false);
+  }
+
+  public static void setInCallStatusPreference(Context context,boolean value){
+      PreferenceManager.getDefaultSharedPreferences(context).edit()
+              .putBoolean(RECONNECTING__IS_IN_CALL_PREF, value)
+              .commit();
+  }
+
+  public static boolean getIsInCall(Context context) {
+      return PreferenceManager
+              .getDefaultSharedPreferences(context).getBoolean(RECONNECTING__IS_IN_CALL_PREF, false);
+  }
+
+  public static void setCallScreenEndButtonPressed(Context context,boolean value){
+      PreferenceManager.getDefaultSharedPreferences(context).edit()
+              .putBoolean(CALL_END_BUTTON_PRESSED, value)
+              .commit();
+  }
+
+  public static boolean isCallScreenEndButtonPressed(Context context) {
+      return PreferenceManager
+              .getDefaultSharedPreferences(context).getBoolean(CALL_END_BUTTON_PRESSED, false);
+  }
+
+    public static void setCallTimerCount(Context context,long value){
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putLong(CALL_TIMER_COUNT, value)
+                .commit();
+    }
+
+    public static long getCallTimerCount(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context).getLong(CALL_TIMER_COUNT, 0);
+    }
 
 }
