@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
- * Copyright (C) 2014 Securecom
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public class DialerActivity extends SherlockFragmentActivity {
   public static final int    MISSED_CALL     = 1;
   public static final String CALL_LOG_ACTION = "com.securecomcode.voice.ui.DialerActivity";
 
-  private static final int CALL_LOG_TAB_INDEX = 1;
+  private static final int CALL_LOG_TAB_INDEX = 2;
 
   private ViewPager viewPager;
 
@@ -117,7 +117,7 @@ public class DialerActivity extends SherlockFragmentActivity {
   }
 
   private void setupTabs() {
-    int[] icons = new int[] { R.drawable.ic_tab_contacts, R.drawable.ic_tab_recent, R.drawable.ic_tab_favorites, R.drawable.ic_menu_dialpad_dk};
+    int[] icons = new int[] { R.drawable.ic_tab_favorites, R.drawable.ic_tab_contacts, R.drawable.ic_tab_recent, R.drawable.ic_menu_dialpad_dk};
 
     for (int i = 0; i < icons.length; i++) {
       ActionBar.Tab tab = getSupportActionBar().newTab();
@@ -203,15 +203,15 @@ public class DialerActivity extends SherlockFragmentActivity {
     @Override
     public Fragment getItem(int i) {
       switch (i) {
-        case 0:
-          return new ContactsListActivity();
         case 1:
+          return new ContactsListActivity();
+        case 2:
           return new RecentCallListActivity();
         case 3:
-              return new DialpadFragment();
-        case 2:
+          return new DialpadFragment();
+        case 0:
         default:
-          ContactsListActivity fragment = new ContactsListActivity();
+          PushContactsListActivity fragment = new PushContactsListActivity();
           Bundle args = new Bundle();
           args.putBoolean("favorites", true);
           fragment.setArguments(args);

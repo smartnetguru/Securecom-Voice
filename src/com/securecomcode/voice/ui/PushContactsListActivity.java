@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2011 Whisper Systems
  * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,13 +32,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -52,18 +48,15 @@ import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-
 import com.securecomcode.voice.Constants;
 import com.securecomcode.voice.R;
 import com.securecomcode.voice.RedPhone;
 import com.securecomcode.voice.RedPhoneService;
-import com.securecomcode.voice.Release;
 import com.securecomcode.voice.contacts.Contact;
 import com.securecomcode.voice.contacts.ContactAccessor;
 import com.securecomcode.voice.contacts.ContactTokenDetails;
 import com.securecomcode.voice.contacts.ContactsSectionIndexer;
 import com.securecomcode.voice.directory.Directory;
-import com.securecomcode.voice.signaling.OtpCounterProvider;
 import com.securecomcode.voice.signaling.SignalingException;
 import com.securecomcode.voice.signaling.SignalingSocket;
 import com.securecomcode.voice.util.DirectoryUtil;
@@ -73,11 +66,9 @@ import com.securecomcode.voice.util.Util;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 
 import static com.securecomcode.voice.util.Util.showAlertOnNoData;
 
@@ -89,7 +80,7 @@ import static com.securecomcode.voice.util.Util.showAlertOnNoData;
  *
  */
 
-public class ContactsListActivity extends SherlockListFragment
+public class PushContactsListActivity extends SherlockListFragment
 {
 
     private HashMap<Long, SoftReference<Bitmap>> photoCache
@@ -97,15 +88,29 @@ public class ContactsListActivity extends SherlockListFragment
 
     private boolean showSectionHeaders = true;
     ArrayList<Contact> contactList = new ArrayList<Contact>();
-    private boolean loadContacts = false;
+    private boolean loadPushContacts = false;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
 
         switch (item.getItemId()) {
-            case R.id.searchItem:
-                this.getSherlockActivity().getSupportActionBar().setIcon(R.drawable.ic_tab_contacts);
+            case R.id.refreshItem:
+                new ProgressDialogAsyncTask<Void,Void,Void>(this.getActivity(),
+                        getString(R.string.ContactsListActivity_updating_contacts),
+                        getString(R.string.ContactsListActivity_updating_securecom_contacts))
+                {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        doDirectoryRefresh();
+                        getActivity().finish();
+                        startActivity(getActivity().getIntent());
+                        return null;
+                    }
+                }.execute();
+                return true;
+            case R.id.pushSearchItem:
+                this.getSherlockActivity().getSupportActionBar().setIcon(R.drawable.ic_tab_favorites);
                 return true;
         }
 
@@ -132,9 +137,10 @@ public class ContactsListActivity extends SherlockListFragment
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.contact_list_options_menu, menu);
-        menu.findItem(R.id.searchItem).setVisible(true);
-        initializeSearch((android.widget.SearchView) menu.findItem(R.id.searchItem).getActionView());
+        inflater.inflate(R.menu.pushcontact_list_options_menu, menu);
+        menu.findItem(R.id.refreshItem).setVisible(true);
+        menu.findItem(R.id.pushSearchItem).setVisible(true);
+        initializeSearch((android.widget.SearchView) menu.findItem(R.id.pushSearchItem).getActionView());
     }
 
     @SuppressLint({ "NewApi", "NewApi" })
@@ -168,6 +174,7 @@ public class ContactsListActivity extends SherlockListFragment
                         }
                     }
                 }
+
                 if(searchList.size() == 0){
                     ((TextView) getListView().getEmptyView()).setText(R.string.ContactsListActivity_no_contacts_found);
                 }
@@ -181,6 +188,46 @@ public class ContactsListActivity extends SherlockListFragment
                 return onQueryTextSubmit(newText);
             }
         });
+    }
+
+    private void doDirectoryRefresh() {
+        Directory directory;
+        Set<String> eligibleContactNumbers = null;
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SignalingSocket signalingSocket;
+
+        try {
+            signalingSocket = new SignalingSocket(getActivity());
+
+            directory = Directory.getInstance(getActivity());
+
+
+            if(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Constants.REG_OPTION_SELECTED, "").equalsIgnoreCase("Phone")){
+                eligibleContactNumbers = directory.getPushEligibleContactNumbers(preferences.getString(("LOCALNUMBER"), ""), null);
+            }else if(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Constants.REG_OPTION_SELECTED, "").equalsIgnoreCase("Email")){
+                eligibleContactNumbers = directory.getPushEligibleContactNumbers(preferences.getString(("LOCALNUMBER"), ""), PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Constants.COUNTRY_CODE_SELECTED, ""));
+            }
+
+            Map<String, String> tokenMap = DirectoryUtil.getDirectoryServerTokenMap(eligibleContactNumbers);
+            try {
+                List<ContactTokenDetails> activeTokens = signalingSocket.retrieveDirectory(tokenMap.keySet());
+                if (activeTokens != null) {
+                    for (ContactTokenDetails activeToken : activeTokens) {
+                        eligibleContactNumbers.remove(tokenMap.get(activeToken.getToken()));
+                        activeToken.setNumber(tokenMap.get(activeToken.getToken()));
+                    }
+
+                    directory.setNumbers(activeTokens);
+                }
+            } catch (SignalingException e) {
+                e.printStackTrace();
+            }
+            signalingSocket.close();
+        } catch (SignalingException e) {
+            Log.w("RedPhoneService", e);
+        }catch (Exception e) {
+            Log.w("DirectoryUpdateReceiver", e);
+        }
     }
 
     @Override
@@ -228,13 +275,13 @@ public class ContactsListActivity extends SherlockListFragment
 
     private void displayContacts() {
         this.showSectionHeaders = !isFavoritesFragment();
-        if (!loadContacts) {
+        if(!loadPushContacts) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                new FetchContacts().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }else{
-                new FetchContacts().execute();
+                new PushRegisteredContacts().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                new PushRegisteredContacts().execute();
             }
-            loadContacts = true;
+            loadPushContacts = true;
         }
         getListView().setDivider(null);
     }
@@ -365,9 +412,9 @@ public class ContactsListActivity extends SherlockListFragment
                 textView.setTextColor(getResources().getColor(R.color.black));
                 int curTextViewId = prevTextViewId + 1;
                 textView.setId(curTextViewId);
-                final RelativeLayout.LayoutParams params =
-                        new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT,
-                                RelativeLayout.LayoutParams.WRAP_CONTENT);
+                final LayoutParams params =
+                        new LayoutParams(LayoutParams.FILL_PARENT,
+                                LayoutParams.WRAP_CONTENT);
                 params.addRule(RelativeLayout.BELOW, prevTextViewId);
                 textView.setLayoutParams(params);
                 prevTextViewId = curTextViewId;
@@ -394,7 +441,7 @@ public class ContactsListActivity extends SherlockListFragment
 
         private Bitmap constructNewBitmap(long id) {
             Bitmap newBitmap            = ContactAccessor.getInstance()
-                    .getPhoto(ContactsListActivity.this.getActivity(), id);
+                    .getPhoto(PushContactsListActivity.this.getActivity(), id);
             SoftReference<Bitmap> newSR = new SoftReference<Bitmap>(newBitmap);
             photoCache.put(id,newSR);
             return newBitmap;
@@ -412,49 +459,61 @@ public class ContactsListActivity extends SherlockListFragment
         return getArguments() != null && getArguments().getBoolean("favorites", false);
     }
 
-    private class FetchContacts extends AsyncTask<Void, Void, Void> {
+    private class PushRegisteredContacts extends AsyncTask<Void, Void, Void> {
         private HashMap<String, Integer> groupingTable;
+
         @Override
         protected Void doInBackground(Void... params) {
+            List<String> push = Directory.getInstance(getActivity()).getActiveNumbers();
             groupingTable = new HashMap<String, Integer>();
             Cursor cursor = getActivity().getContentResolver().query(
                     ContactsContract.Data.CONTENT_URI,
                     null,
                     ContactsContract.Data.IN_VISIBLE_GROUP + "!=0 AND (" + ContactsContract.Data.MIMETYPE + "=? OR " + ContactsContract.Data.MIMETYPE + "=?)",
-                    new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
+                    new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE, Phone.CONTENT_ITEM_TYPE},
                     ContactsContract.Data.DISPLAY_NAME + " COLLATE NOCASE ASC");
 
-            if(cursor.getCount() > 0){
-                while(cursor.moveToNext()){
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
                     String contactName = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
-                    int personId       = cursor.getInt(cursor.getColumnIndex(Phone.CONTACT_ID));
-                    String number      = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
-                    int rowId          = cursor.getInt(cursor.getColumnIndex(Phone._ID));
+                    int personId = cursor.getInt(cursor.getColumnIndex(Phone.CONTACT_ID));
+                    String number = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
+                    int rowId = cursor.getInt(cursor.getColumnIndex(Phone._ID));
 
-                    Contact c = new Contact();
+                        String numberAfterFormat = number;
+                        if(!Util.isValidEmail(number) && !number.contains("@")){
+                            numberAfterFormat = number.replace("(", "");
+                            numberAfterFormat = numberAfterFormat.replace(")", "");
+                            numberAfterFormat = numberAfterFormat.replace("-", "");
+                            numberAfterFormat = numberAfterFormat.replace(" ", "");
+                            numberAfterFormat = numberAfterFormat.length() > 10 ? numberAfterFormat.substring(numberAfterFormat.length() - 10) : numberAfterFormat;
+                        }
 
-                    if (!groupingTable.containsKey(contactName) ||
-                            (groupingTable.containsKey(contactName) &&
-                                    groupingTable.get(contactName) == rowId))
-                    {
-                        groupingTable.put(contactName, rowId);
-                        c.setContactName(contactName);
-                        c.setPersonId(personId);
-                        c.setPhoneNumber(number);
-                        contactList.add(c);
-                    } else {
-                        for (Contact tempcontact : contactList) {
-                            if(tempcontact.getContactName().equals(contactName)){
+                        if(push.contains(numberAfterFormat)){
+                            Contact c = new Contact();
 
-                                if(!tempcontact.getPhoneNumber().contains(number)){
-                                    tempcontact.setPhoneNumber(number);
+                            if (!groupingTable.containsKey(contactName) ||
+                                    (groupingTable.containsKey(contactName) &&
+                                            groupingTable.get(contactName) == rowId)) {
+                                groupingTable.put(contactName, rowId);
+                                c.setContactName(contactName);
+                                c.setPersonId(personId);
+                                c.setPhoneNumber(number);
+                                c.setPushRegistered(true);
+                                contactList.add(c);
+                            } else {
+                                for (Contact tempcontact : contactList) {
+                                    if (tempcontact.getContactName().equals(contactName)) {
+
+                                        if (!tempcontact.getPhoneNumber().contains(number)) {
+                                            tempcontact.setPhoneNumber(number);
+                                        }
+
+                                        break;
+                                    }
                                 }
-
-                                break;
                             }
                         }
-                    }
-
                 }
 
                 cursor.close();
@@ -464,17 +523,16 @@ public class ContactsListActivity extends SherlockListFragment
 
         @Override
         protected void onPreExecute() {
-            ((TextView)getListView().getEmptyView()).setText(R.string.ContactsListActivity_loading);
+            ((TextView) getListView().getEmptyView()).setText(R.string.ContactsListActivity_loading);
         }
 
         @Override
         protected void onPostExecute(Void result) {
-            if(contactList.size() > 0){
+            if (contactList.size() > 0) {
                 setAdapter(contactList);
-            }else{
-                ((TextView)getListView().getEmptyView()).setText(R.string.ContactsListActivity_no_contacts_found);
+            } else {
+                ((TextView) getListView().getEmptyView()).setText(R.string.ContactsListActivity_no_contacts_found);
             }
         }
-
     }
 }

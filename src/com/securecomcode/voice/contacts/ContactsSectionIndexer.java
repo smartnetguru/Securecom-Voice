@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@ package com.securecomcode.voice.contacts;
 import android.database.Cursor;
 import android.widget.SectionIndexer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,28 +38,24 @@ public class ContactsSectionIndexer implements SectionIndexer {
   private final String[] sections;
   private final Integer[] positions;
 
-    public ContactsSectionIndexer(Cursor cursor, String columnName) {
+    public ContactsSectionIndexer(ArrayList<Contact> contactlist) {
       List<String> sections   = new LinkedList<String>();
       List<Integer> positions = new LinkedList<Integer>();
 
-      if (cursor != null) {
+      if(contactlist != null){
         char lastSection = ' ';
         int i            = 0;
-
-        cursor.moveToPosition(-1);
-        while (cursor.moveToNext()) {
-          String item = cursor.getString(cursor.getColumnIndex(columnName)).trim().toUpperCase();
-
-          if (item.length() > 0) {
-            char firstChar = item.charAt(0);
-            if (firstChar != lastSection) {
-              sections.add(firstChar+"");
-              positions.add(i);
-              lastSection = firstChar;
+        for(Contact c:contactlist){
+            String item = c.getContactName().toUpperCase();
+            if (item.length() > 0) {
+                char firstChar = item.charAt(0);
+                if (firstChar != lastSection) {
+                    sections.add(firstChar+"");
+                    positions.add(i);
+                    lastSection = firstChar;
+                }
             }
-          }
-
-          i++;
+            i++;
         }
       }
 

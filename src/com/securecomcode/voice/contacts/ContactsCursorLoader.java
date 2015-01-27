@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.securecomcode.voice.contacts;
 
 import android.content.Context;
@@ -6,7 +24,6 @@ import android.database.MergeCursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.v4.content.CursorLoader;
-import android.util.Log;
 
 import com.securecomcode.voice.directory.Directory;
 
@@ -20,12 +37,11 @@ public class ContactsCursorLoader extends CursorLoader {
     public static final String NUMBER_TYPE_COLUMN = ContactsContract.CommonDataKinds.Phone.TYPE;
     public static final String NUMBER_COLUMN = ContactsContract.CommonDataKinds.Phone.NUMBER;
     public static final String LABEL_COLUMN = ContactsContract.CommonDataKinds.Phone.LABEL;
-    public static final String CONTACT_LIST_SORT = NAME_COLUMN + " COLLATE NOCASE ASC";
+    public static final String CONTACT_LIST_SORT = ContactsContract.Data.DISPLAY_NAME + " COLLATE NOCASE ASC";
 
 
     private final Context  context;
     private final Cursor   androidCursor;
-    private final Cursor   androidPhoneCursor;
     private final Cursor   activePushContactsCursor;
     private final boolean  pushOnly;
     private final String[] ANDROID_PROJECTION = new String[]{ID_COLUMN,
@@ -39,7 +55,6 @@ public class ContactsCursorLoader extends CursorLoader {
         super(context);
         this.context  = context;
         this.androidCursor = queryAndroidDb(filter);
-        this.androidPhoneCursor = queryAndroidPhoneDb(filter);
         this.pushOnly = pushOnly;
         this.activePushContactsCursor = Directory.getInstance(context).getActiveNumbersCursor();
     }
@@ -49,20 +64,10 @@ public class ContactsCursorLoader extends CursorLoader {
 
         if (pushOnly) {
             return activePushContactsCursor;
+        }else{
+            return androidCursor;
         }
 
-        List<Cursor> cursors = new ArrayList<Cursor>();
-        if (androidPhoneCursor != null) cursors.add(androidPhoneCursor);
-        if (androidCursor != null) cursors.add(androidCursor);
-        switch (cursors.size()) {
-            case 0:
-                return null;
-            case 1:
-                return cursors.get(0);
-            default:
-                return new MergeCursor(cursors.toArray(new Cursor[]{}));
-
-        }
     }
 
     @Override
@@ -71,28 +76,44 @@ public class ContactsCursorLoader extends CursorLoader {
     }
 
     private Cursor queryAndroidDb(String filter) {
-        final Uri baseUri;
-        if (filter != null) {
-            baseUri = Uri.withAppendedPath(ContactsContract.CommonDataKinds.Email.CONTENT_FILTER_URI,
-                    Uri.encode(filter));
-        } else {
-            baseUri = ContactsContract.CommonDataKinds.Email.CONTENT_URI;
-        }
+        Uri baseUri;
+        Cursor cursor;
+        List<Cursor> cursors = new ArrayList<Cursor>();
 
-        Cursor cursor = context.getContentResolver().query(baseUri, null, null, null, CONTACT_LIST_SORT);
-        return cursor;
-    }
-
-    private Cursor queryAndroidPhoneDb(String filter) {
-        final Uri baseUri;
         if (filter != null) {
             baseUri = Uri.withAppendedPath(ContactsContract.CommonDataKinds.Phone.CONTENT_FILTER_URI,
                     Uri.encode(filter));
+
+            cursor = context.getContentResolver().query(
+                    baseUri,
+                    null,
+                    null,
+                    null,
+                    CONTACT_LIST_SORT);
+            cursors.add(cursor);
+            baseUri = Uri.withAppendedPath(ContactsContract.CommonDataKinds.Email.CONTENT_FILTER_URI,
+                    Uri.encode(filter));
+            cursor = context.getContentResolver().query(
+                    baseUri,
+                    null,
+                    null,
+                    null,
+                    CONTACT_LIST_SORT);
+            cursors.add(cursor);
+            return new MergeCursor(cursors.toArray(new Cursor[]{}));
+
         } else {
-            baseUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+            baseUri = ContactsContract.Data.CONTENT_URI;
+
+            cursor = context.getContentResolver().query(
+                    baseUri,
+                    null,
+                    ContactsContract.Data.IN_VISIBLE_GROUP + "!=0 AND (" + ContactsContract.Data.MIMETYPE + "=? OR " + ContactsContract.Data.MIMETYPE + "=?)",
+                    new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
+                    CONTACT_LIST_SORT);
+            return cursor;
         }
 
-        Cursor cursor = context.getContentResolver().query(baseUri, null, null, null, CONTACT_LIST_SORT);
-        return cursor;
     }
+
 }

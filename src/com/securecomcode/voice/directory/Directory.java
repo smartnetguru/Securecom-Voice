@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
- * Copyright (C) 2014 Securecom
+ * Copyright (C) 2015 Securecom
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -85,7 +85,15 @@ public class Directory {
         try {
             for (ContactTokenDetails token : activeTokens) {
                 Log.w("Directory", "Adding number: " + token.getNumber());
-                values.put(NUMBER, token.getNumber());
+                String s = token.getNumber();
+                if(!Util.isValidEmail(s) && !s.contains("@")) {
+                    s = s.replace("(", "");
+                    s = s.replace(")", "");
+                    s = s.replace("-", "");
+                    s = s.replace(" ", "");
+                    s = s.length() > 10 ? s.substring(s.length() - 10) : s;
+                }
+                values.put(NUMBER, s);
                 db.replace(TABLE_NAME, null, values);
             }
             db.setTransactionSuccessful();
@@ -186,15 +194,6 @@ public class Directory {
         Cursor cursor = null;
 
         cursor = databaseHelper.getReadableDatabase().query(TABLE_NAME, new String[]{ID, NUMBER}, null, null, null, null, null);
-        /*databaseHelper.getReadableDatabase().beginTransaction();
-        try{
-            cursor = databaseHelper.getReadableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
-        }finally {
-           databaseHelper.getReadableDatabase().endTransaction();
-        }*/
-
-        /*cursor.close();*/
-
         return cursor;
     }
 
