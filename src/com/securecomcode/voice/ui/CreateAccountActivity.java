@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
- * Copyright (C) 2014 Securecom
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -255,8 +255,10 @@ public class CreateAccountActivity extends SherlockActivity {
   }
 
   private void setCountryDisplay(String value) {
-    this.countrySpinnerAdapter.clear();
-    this.countrySpinnerAdapter.add(value);
+      if(this.countrySpinnerAdapter != null) {
+          this.countrySpinnerAdapter.clear();
+          this.countrySpinnerAdapter.add(value);
+      }
   }
 
   private void setCountryFormatter(int countryCode) {
