@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,17 +32,19 @@ import com.securecomcode.voice.Release;
 
 public class SessionDescriptor implements Parcelable {
   public int relayPort;
-  public long sessionId;
+  public long sessionId = 0;
   public String serverName;
   public int version;
+  public String serverIP;
 
   public SessionDescriptor() {}
 
-  public SessionDescriptor(String serverName, int relayPort, long sessionId, int version) {
+  public SessionDescriptor(String serverName, String serverip, int relayPort, long sessionId, int version) {
     this.serverName = serverName;
     this.relayPort  = relayPort;
     this.sessionId  = sessionId;
     this.version    = version;
+    this.serverIP   = serverip;
   }
 
   public SessionDescriptor(Parcel in) {
@@ -49,6 +52,7 @@ public class SessionDescriptor implements Parcelable {
     this.sessionId  = in.readLong();
     this.serverName = in.readString();
     this.version    = in.readInt();
+    this.serverIP   = in.readString();
   }
 
   public String getFullServerName() {
@@ -63,6 +67,7 @@ public class SessionDescriptor implements Parcelable {
     SessionDescriptor that = (SessionDescriptor)other;
 
     return this.relayPort == that.relayPort &&
+           this.serverIP  == that.serverIP  &&
            this.sessionId == that.sessionId &&
            this.serverName.equals(that.serverName) &&
            this.version == that.version;
@@ -84,6 +89,7 @@ public class SessionDescriptor implements Parcelable {
     dest.writeLong(sessionId);
     dest.writeString(serverName);
     dest.writeInt(version);
+    dest.writeString(serverIP);
   }
 
   public static final Parcelable.Creator<SessionDescriptor> CREATOR =

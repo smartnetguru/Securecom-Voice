@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,13 +34,15 @@ public class IncomingCallDetails {
   private final long sessionId;
   private final String host;
   private final int version;
+  private final String ip;
 
-  public IncomingCallDetails(String initiator, int port, long sessionId, String host, int version) {
+  public IncomingCallDetails(String initiator, int port, long sessionId, String host, int version, String ip) {
     this.initiator = initiator;
     this.port      = port;
     this.sessionId = sessionId;
     this.host      = host;
     this.version   = version;
+    this.ip        = ip;
   }
 
   public String getHost() {
@@ -60,5 +63,9 @@ public class IncomingCallDetails {
 
   public int getVersion() {
     return version;
+  }
+
+  public String getIP(){
+      return ip;
   }
 }

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +58,7 @@ public class SMSListener extends BroadcastReceiver {
     intent.setAction(RedPhoneService.ACTION_INCOMING_CALL);
     intent.putExtra(Constants.REMOTE_NUMBER, call.getInitiator());
     intent.putExtra(Constants.SESSION, new SessionDescriptor(call.getHost(),
+                                                             call.getIP(),
                                                              call.getPort(),
                                                              call.getSessionId(),
                                                              call.getVersion()));

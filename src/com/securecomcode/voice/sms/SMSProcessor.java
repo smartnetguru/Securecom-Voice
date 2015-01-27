@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +100,7 @@ public class SMSProcessor {
 
       return new IncomingCallDetails(signal.getInitiator(), signal.getPort(),
                                      signal.getSessionId(), signal.getServerName(),
-                                     signal.getVersion());
+                                     signal.getVersion(), signal.getServerIP());
 
     } catch (InvalidEncryptedSignalException e) {
       Log.w("SMSProcessor", e);

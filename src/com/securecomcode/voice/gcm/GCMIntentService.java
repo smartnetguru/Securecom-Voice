@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2011 Whisper Systems
- * Copyright (C) 2014 Securecom
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,6 +70,7 @@ public class GCMIntentService extends GCMBaseIntentService {
                 intent.setAction(RedPhoneService.ACTION_INCOMING_CALL);
                 intent.putExtra(Constants.REMOTE_NUMBER, callDetails.getInitiator());
                 intent.putExtra(Constants.SESSION, new SessionDescriptor(callDetails.getHost(),
+                        callDetails.getIP(),
                         callDetails.getPort(),
                         callDetails.getSessionId(),
                         callDetails.getVersion()));
@@ -87,7 +88,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 
             return new IncomingCallDetails(signal.getInitiator(), signal.getPort(),
                     signal.getSessionId(), signal.getServerName(),
-                    signal.getVersion());
+                    signal.getVersion(),
+                    signal.getServerIP());
         } catch (InvalidEncryptedSignalException e) {
             Log.w("GCMIntentService", e);
             return null;

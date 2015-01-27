@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
- * Copyright (C) 2014 Securecom
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,10 @@
 package com.securecomcode.voice.call;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.securecomcode.voice.Constants;
 import com.securecomcode.voice.Release;
 import com.securecomcode.voice.crypto.SecureRtpSocket;
 import com.securecomcode.voice.crypto.zrtp.MasterSecret;
@@ -80,13 +82,16 @@ public class ResponderCallManager extends CallManager {
         return;
       }
 
+      PreferenceManager.getDefaultSharedPreferences(context).edit().putLong(Constants.CURRENT_CALL_SESSION_ID, sessionDescriptor.sessionId).commit();
+
       int localPort = new NetworkConnector(sessionDescriptor.sessionId,
-                                           sessionDescriptor.getFullServerName(),
+                                           sessionDescriptor.serverIP,
                                            sessionDescriptor.relayPort).makeConnection();
+
       InetSocketAddress remoteAddress = new InetSocketAddress(sessionDescriptor.getFullServerName(),
                                                               sessionDescriptor.relayPort);
 
-      secureSocket  = new SecureRtpSocket(new RtpSocket(localPort, remoteAddress));
+      secureSocket  = new SecureRtpSocket(new RtpSocket(context, localPort, remoteAddress, sessionDescriptor));
 
       zrtpSocket    = new ZRTPResponderSocket(context, secureSocket, zid, remoteNumber, sessionDescriptor.version <= 0);
 

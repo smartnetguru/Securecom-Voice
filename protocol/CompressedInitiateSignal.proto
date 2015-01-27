@@ -9,4 +9,5 @@ message CompressedInitiateSignal {
   optional uint32 port = 3;
   optional string serverName = 4;
   optional uint32 version = 5;
+  optional string serverIP = 6;
 }

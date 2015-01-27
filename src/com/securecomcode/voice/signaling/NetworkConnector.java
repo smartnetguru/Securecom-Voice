@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Whisper Systems
+ * Copyright (C) 2015 Securecom
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +18,19 @@
 
 package com.securecomcode.voice.signaling;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.securecomcode.voice.signaling.signals.OpenPortSignal;
 import com.securecomcode.voice.signaling.signals.Signal;
+import com.securecomcode.voice.ui.ApplicationPreferencesActivity;
 import com.securecomcode.voice.util.LineReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Map;
@@ -57,14 +61,15 @@ public class NetworkConnector {
 
   public int makeConnection() throws SessionInitiationFailureException {
     int result = -1;
-    int timeout = 1000;
-    for (int attempts = 0; attempts < 5; attempts++) {
+    int timeout = 10000;
+    while(true){
       Log.d("NetworkConnector", "attempting connection");
       result = attemptConnection( timeout );
       if (result != -1)
         break;
       timeout *= 2;
-      if( timeout > 10000 ) timeout = 10000;
+      if( timeout > 10000 ) timeout = 60000;
+
     }
 
     if (result == -1)
@@ -76,6 +81,7 @@ public class NetworkConnector {
   private int attemptConnection( int timeout ) {
     try {
       socket = new DatagramSocket();
+
       socket.connect(new InetSocketAddress(server, port));
       socket.setSoTimeout(timeout);
       sendSignal(new OpenPortSignal(sessionId));
