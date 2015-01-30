@@ -25,6 +25,7 @@ import android.util.Log;
 
 import com.securecomcode.voice.Constants;
 import com.securecomcode.voice.util.Base64;
+import com.securecomcode.voice.util.Util;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -61,26 +62,32 @@ public class EncryptedSignalMessage {
     private static final int CIPHERTEXT_OFFSET = IV_OFFSET + 16;
     private static final int MAC_LENGTH = 10;
 
+    private static final byte[] VERSION = new byte[] {0x00};
+    private static final int CIPHER_KEY_SIZE = 16;
+    private static final int MAC_KEY_SIZE = 20;
+    private static final int MAC_SIZE = 10;
+
     private final String message;
     private final byte[] msg;
     private final Context context;
     private final char[] hexArray = "0123456789ABCDEF".toCharArray();
+    private String key;
 
     public EncryptedSignalMessage(Context context, String message) {
         this.message = message;
         this.msg = message.getBytes();
         this.context = context.getApplicationContext();
+        this.key = PreferenceManager.getDefaultSharedPreferences(context).getString(Constants.KEY_PREFERENCE, null);
     }
 
-    public EncryptedSignalMessage(Context context, byte[] message) {
+    public EncryptedSignalMessage(Context context, byte[] message, String key) {
         this.msg = message;
         this.message = new String(msg);
         this.context = context.getApplicationContext();
+        this.key = key;
     }
 
     private byte[] getCombinedKey() throws InvalidEncryptedSignalException, IOException {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String key = preferences.getString(Constants.KEY_PREFERENCE, null);
         if (key == null)
             throw new InvalidEncryptedSignalException("No combined key available!");
 
@@ -225,6 +232,50 @@ public class EncryptedSignalMessage {
         } catch (BadPaddingException e) {
             throw new InvalidEncryptedSignalException(e);
         }
+    }
+
+    public static byte[] encrypt(byte[] plaintext, String signalingKey) throws CryptoEncodingException
+    {
+        byte[] key = new byte[0];
+        try {
+            key = Base64.decode(signalingKey);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (key.length < CIPHER_KEY_SIZE + MAC_KEY_SIZE)
+            throw new CryptoEncodingException("Signaling key too short!");
+        SecretKeySpec cipherKey = new SecretKeySpec(Util.slice(key, 0, CIPHER_KEY_SIZE), "AES");
+        SecretKeySpec macKey = new SecretKeySpec(Util.slice(key, CIPHER_KEY_SIZE, MAC_KEY_SIZE), "HmacSHA1");
+        return encrypt(plaintext, cipherKey, macKey);
+    }
+
+    private static byte[] encrypt(byte[] plaintext, SecretKeySpec cipherKey, SecretKeySpec macKey)
+            throws CryptoEncodingException
+    {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, cipherKey);
+            byte[] ciphertext = cipher.doFinal(plaintext);
+            Mac hmac = Mac.getInstance("HmacSHA1");
+            hmac.init(macKey);
+            hmac.update(VERSION);
+            byte[] ivBytes = cipher.getIV();
+            hmac.update(ivBytes);
+            byte[] mac = hmac.doFinal(ciphertext);
+            byte[] truncatedMac = Util.slice(mac, 10, MAC_SIZE);
+            return Util.concat(VERSION, ivBytes, ciphertext, truncatedMac);
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError(e);
+        } catch (InvalidKeyException e) {
+            throw new CryptoEncodingException("Invalid key!");
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }
