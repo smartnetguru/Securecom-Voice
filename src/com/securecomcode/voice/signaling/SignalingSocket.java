@@ -28,6 +28,7 @@ import com.securecomcode.voice.contacts.ContactTokenDetailsList;
 import com.securecomcode.voice.contacts.ContactTokenList;
 import com.securecomcode.voice.signaling.signals.CallSignalStateListener;
 import com.securecomcode.voice.signaling.signals.GetContactsSignal;
+import com.securecomcode.voice.signaling.signals.PeerSignal;
 import com.securecomcode.voice.sms.IncomingCallDetails;
 import com.google.thoughtcrimegson.Gson;
 
@@ -48,6 +49,7 @@ import com.securecomcode.voice.signaling.signals.RingingSignal;
 import com.securecomcode.voice.signaling.signals.ServerSignal;
 import com.securecomcode.voice.signaling.signals.Signal;
 import com.securecomcode.voice.signaling.signals.SignalPreferenceSignal;
+import com.securecomcode.voice.ui.ApplicationPreferencesActivity;
 import com.securecomcode.voice.util.LineReader;
 import com.securecomcode.voice.util.PhoneNumberFormatter;
 
@@ -222,7 +224,7 @@ public class SignalingSocket {
     public SessionDescriptor initiateConnection(String remoteNumber)
             throws ServerMessageException, SignalingException,
             NoSuchUserException, LoginFailedException {
-        sendSignal(new InitiateSignal(localNumber, password,
+        sendSignal(new InitiateSignal(context, localNumber, password,
                 counterProvider.getOtpCounter(context),
                 remoteNumber));
 
@@ -231,6 +233,10 @@ public class SignalingSocket {
         Gson gson = new Gson();
 
         String s = new String(response.getBody());
+
+        Map<String, String> headers = response.getHeaders();
+        String shared_secret = headers.get("Shared-Secret");
+        ApplicationPreferencesActivity.setSharedSecretPref(context, shared_secret);
 
         switch (response.getStatusCode()) {
             case 404:
@@ -248,11 +254,15 @@ public class SignalingSocket {
 
     public void setRinging(long sessionId)
             throws SignalingException, SessionStaleException, LoginFailedException {
-        sendSignal(new RingingSignal(localNumber, password,
+        sendSignal(new RingingSignal(context, localNumber, password,
                 counterProvider.getOtpCounter(context),
                 sessionId));
 
         SignalResponse response = readSignalResponse();
+
+        Map<String, String> headers = response.getHeaders();
+        String shared_secret = headers.get("Shared-Secret");
+        ApplicationPreferencesActivity.setSharedSecretPref(context, shared_secret);
 
         switch (response.getStatusCode()) {
             case 404:
@@ -318,6 +328,23 @@ public class SignalingSocket {
 
         switch (response.getStatusCode()) {
             case 200:
+                return;
+            default:
+                throw new SignalingException("Received error from server: " +
+                        new String(response.getBody()));
+        }
+    }
+
+    public void sendPeer(long sessionId) throws SignalingException {
+        sendSignal(new PeerSignal(localNumber, password, OtpCounterProvider.getInstance().getOtpCounter(context), sessionId));
+        SignalResponse response = readSignalResponse();
+
+        switch (response.getStatusCode()) {
+            case 200:
+                close();
+                return;
+            case 404:
+                close();
                 return;
             default:
                 throw new SignalingException("Received error from server: " +

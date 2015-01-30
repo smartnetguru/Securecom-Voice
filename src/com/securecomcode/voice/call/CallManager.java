@@ -88,6 +88,7 @@ public abstract class CallManager extends Thread {
     initMonitor();
     printInitDebug();
     AudioUtils.resetConfiguration(context);
+    ApplicationPreferencesActivity.setIncomingCall(context, false);
   }
 
   private void initMonitor() {
@@ -118,6 +119,11 @@ public abstract class CallManager extends Thread {
         setSecureSocketKeys(zrtpSocket.getMasterSecret());
         sasInfo = zrtpSocket.getSasInfo();
         callStateListener.notifyCallConnected(sasInfo);
+
+        if(this.getName().equalsIgnoreCase("ResponderCallManager Thread")) {
+            ApplicationPreferencesActivity.setIncomingCall(context, true);
+        }
+
         signalManager.shutdownQueue();
       }
 
