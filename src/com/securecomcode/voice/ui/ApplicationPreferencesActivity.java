@@ -76,6 +76,10 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
   public static final String RECONNECTING__IS_IN_CALL_PREF    = "pref_in_call";
   public static final String CALL_END_BUTTON_PRESSED          = "pref_is_terminate_called";
   public static final String CALL_TIMER_COUNT                 = "pref_call_timer_count";
+  public static final String INCOMING_CALL                    = "pref_incoming_call";
+  public static final String DIRECT_CONNECTION                = "pref_direct_connection";
+  public static final String DIRECT_CONNECTION_ENABLE_PREF    = "pref_direct_connection_enable";
+  public static final String SHARED_SECRET                    = "pref_shared_secret";
 
   private static final Gson gson = new Gson();
 
@@ -297,6 +301,46 @@ public class ApplicationPreferencesActivity extends SherlockPreferenceActivity {
 
     public static long getCallTimerCount(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context).getLong(CALL_TIMER_COUNT, 0);
+    }
+
+    public static void setIncomingCall(Context context,boolean value){
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putBoolean(INCOMING_CALL, value)
+                .commit();
+    }
+
+    public static boolean getIncomingCall(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(INCOMING_CALL, false);
+    }
+
+    public static void setDirectConnection(Context context,boolean value){
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putBoolean(DIRECT_CONNECTION, value)
+                .commit();
+    }
+
+    public static boolean isDirectConnection(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(DIRECT_CONNECTION, false);
+    }
+
+    public static void setDirectConnectionPref(Context context,boolean value){
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putBoolean(DIRECT_CONNECTION_ENABLE_PREF, value)
+                .commit();
+    }
+
+    public static boolean getDirectConnectionPref(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(DIRECT_CONNECTION_ENABLE_PREF, false);
+    }
+
+    public static void setSharedSecretPref(Context context,String value){
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putString(SHARED_SECRET, value)
+                .commit();
+    }
+
+    public static String getSharedSecretPref(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(SHARED_SECRET, "");
     }
 
 }
