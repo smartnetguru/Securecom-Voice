@@ -14,6 +14,10 @@
           android:key="pref_disable_traffic_in_call"
           android:title="@string/preferences__prompt_for_graph_during_cal_disable"
           android:summary="@string/preferences__prompt_for_graph_during_cal_disable_description"/>
+      <CheckBoxPreference android:defaultValue="false"
+          android:key="pref_direct_connection_enable"
+          android:title="@string/preferences__setting_direct_connection"
+          android:summary="@string/preferences__setting_direct_connection_description"/>
   </PreferenceCategory>
   <PreferenceCategory android:title="@string/preferences__advanced_audio_settings">
     <CheckBoxPreference android:defaultValue="false"

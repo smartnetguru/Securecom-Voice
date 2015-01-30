@@ -185,6 +185,8 @@
     <string name="preferences__prompt_for_call_upgrade">Prompt for call upgrade</string>
     <string name="preferences__prompt_for_during_call_screen_disable">Disable screen during call</string>
     <string name="preferences__prompt_for_graph_during_cal_disable">View traffic graph during call</string>
+    <string name="preferences__setting_direct_connection">Direction Connection</string>
+    <string name="preferences__setting_direct_connection_description">Improves call reliability. Your IP address may be revealed to those who call you.</string>
     <string name="preferences__prompt_for_graph_during_cal_disable_description">Traffic graph shows incoming packets per minute during call</string>
     <string name="preferences__prompt_for_during_call_screen_disable_description">Use proximity sensor to disable screen, preventing accidental touch events</string>
     <string name="preferences__when_making_insecure_calls_prompt_for_upgrade_to_redphone_if_contact_is_redphone_enabled">When making insecure calls, prompt for upgrade to Securecom Voice if contact is Securecom Voice-enabled.</string>
