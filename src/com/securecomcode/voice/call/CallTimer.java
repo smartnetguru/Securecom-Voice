@@ -70,6 +70,11 @@ public class CallTimer extends CountDownTimer {
         if(ApplicationPreferencesActivity.getDisableTrafficGraphPreference(context)) {
             DataPoint[] dataPoints = TrafficMonitor.getInstance(context).getDataPoints();
             graphView.setVisibility(View.VISIBLE);
+            if(ApplicationPreferencesActivity.isDirectConnection(context)){
+                bgs.setColor(0xFF55AE3A);
+            }else{
+                bgs.setColor(0xFF4169E1);
+            }
             bgs.resetData(dataPoints);
         }
 
