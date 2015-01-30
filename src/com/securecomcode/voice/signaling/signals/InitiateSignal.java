@@ -36,8 +36,8 @@ public class InitiateSignal extends Signal {
 
   private String remoteNumber = "";
 
-  public InitiateSignal(String localNumber, String password, long counter, String remoteNumber) {
-    super(localNumber, password, counter);
+  public InitiateSignal(Context context, String localNumber, String password, long counter, String remoteNumber) {
+    super(context, localNumber, password, counter);
       if(!Util.isValidEmail(remoteNumber)){
           this.remoteNumber = PhoneNumberFormatter.formatNumber(remoteNumber);
       }else if(Util.isValidEmail(remoteNumber)){

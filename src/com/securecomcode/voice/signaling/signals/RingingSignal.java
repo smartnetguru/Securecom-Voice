@@ -17,6 +17,8 @@
 
 package com.securecomcode.voice.signaling.signals;
 
+import android.content.Context;
+
 /**
  * A signal which indicates that the endpoint has
  * received an "initiate" push notification, and that
@@ -30,8 +32,8 @@ public class RingingSignal extends Signal {
 
   private final long sessionId;
 
-  public RingingSignal(String localNumber, String password, long counter, long sessionId) {
-    super(localNumber, password, counter);
+  public RingingSignal(Context context, String localNumber, String password, long counter, long sessionId) {
+    super(context, localNumber, password, counter);
     this.sessionId = sessionId;
   }
 

@@ -18,10 +18,12 @@
 
 package com.securecomcode.voice.signaling.signals;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.securecomcode.voice.BuildConfig;
 import com.securecomcode.voice.crypto.Otp;
+import com.securecomcode.voice.ui.ApplicationPreferencesActivity;
 import com.securecomcode.voice.util.Base64;
 
 /**
@@ -35,11 +37,20 @@ public abstract class Signal {
     private final String localNumber;
     private final String password;
     private final long counter;
+    private final Context context;
 
     public Signal(String localNumber, String password, long counter) {
         this.localNumber = localNumber;
         this.password = password;
         this.counter = counter;
+        this.context = null;
+    }
+
+    public Signal(Context context, String localNumber, String password, long counter) {
+        this.localNumber = localNumber;
+        this.password = password;
+        this.counter = counter;
+        this.context = context;
     }
 
     public String serialize() {
@@ -64,6 +75,28 @@ public abstract class Signal {
         sb.append("User-Agent: ");
         sb.append(System.getProperty("os.name")+"/"+BuildConfig.VERSION_CODE);
         sb.append("\r\n");
+
+        if(context != null && sb.toString().startsWith("GET /session/1/")) {
+            sb.append("Direct-Connection: ");
+            if(ApplicationPreferencesActivity.getDirectConnectionPref(context)){
+                sb.append("enabled");
+            }else{
+                sb.append("disabled");
+            }
+
+            sb.append("\r\n");
+        }
+
+        if(context != null && sb.toString().startsWith("RING /session/")) {
+            sb.append("Direct-Connection: ");
+            if(ApplicationPreferencesActivity.getDirectConnectionPref(context)){
+                sb.append("enabled");
+            }else{
+                sb.append("disabled");
+            }
+            sb.append("\r\n");
+        }
+
         sb.append("\r\n");
         if (sb.toString().startsWith("PUT /gcm/")) {
             sb.append("\r\n");
