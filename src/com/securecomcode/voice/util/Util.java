@@ -195,6 +195,36 @@ public class Util {
         return false;
     }
 
+    public static byte[] concat(byte[] a, byte[] b, byte[] c, byte[] d)
+    {
+        return concat(a, concat(b, concat(c, d)));
+    }
+
+    public static byte[] concat(byte[] a, byte[] b, byte[] c)
+    {
+        return concat(a, concat(b, c));
+    }
+
+    public static byte[] concat(byte[] a, byte[] b)
+    {
+        byte[] result = new byte[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    public static byte[] slice(byte[] a, int start)
+    {
+        return slice(a, start, a.length - start);
+    }
+
+    public static byte[] slice(byte[] a, int start, int length)
+    {
+        byte[] result = new byte[length];
+        System.arraycopy(a, start, result, 0, length);
+        return result;
+    }
+
 
 }
 
